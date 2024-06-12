@@ -31,6 +31,14 @@ class _MainPageState extends State<MainPage> {
         title: const Text('Time and Attendance'),
         icon: const Icon(Iconsax.calendar),
         body: const AttendanceScreen()),
+    PaneItem(
+        title: const Text('Staff Lesson Note'),
+        icon: const Icon(Iconsax.note),
+        body: const AttendanceScreen()),
+    PaneItem(
+        title: const Text('PLC'),
+        icon: const Icon(Iconsax.menu_board),
+        body: const AttendanceScreen()),
   ];
 
   int topIndex = 0;

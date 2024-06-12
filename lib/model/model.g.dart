@@ -38,6 +38,7 @@ class TableStaff extends SqfEntityTableBase {
       SqfEntityFieldBase('email', DbType.text),
       SqfEntityFieldBase('phone_number', DbType.text),
       SqfEntityFieldBase('staff_id', DbType.text),
+      SqfEntityFieldBase('rank', DbType.text),
       SqfEntityFieldRelationshipBase(
           TableDepartment.getInstance, DeleteRule.SET_NULL,
           relationType: RelationType.ONE_TO_MANY,
@@ -112,6 +113,84 @@ class TableDepartment extends SqfEntityTableBase {
   }
 }
 
+// Staff_lesson_note TABLE
+class TableStaff_lesson_note extends SqfEntityTableBase {
+  TableStaff_lesson_note() {
+    // declare properties of EntityTable
+    tableName = 'staff_lesson_note';
+    primaryKeyName = 'id';
+    primaryKeyType = PrimaryKeyType.integer_auto_incremental;
+    useSoftDeleting = false;
+    // when useSoftDeleting is true, creates a field named 'isDeleted' on the table, and set to '1' this field when item deleted (does not hard delete)
+
+    // declare fields
+    fields = [
+      SqfEntityFieldRelationshipBase(TableStaff.getInstance, DeleteRule.CASCADE,
+          relationType: RelationType.ONE_TO_MANY,
+          fieldName: 'staffId',
+          defaultValue: 0),
+      SqfEntityFieldBase('academic_year', DbType.text),
+      SqfEntityFieldBase('term', DbType.text),
+      SqfEntityFieldBase('week_1', DbType.bool),
+      SqfEntityFieldBase('week_2', DbType.bool),
+      SqfEntityFieldBase('week_3', DbType.bool),
+      SqfEntityFieldBase('week_4', DbType.bool),
+      SqfEntityFieldBase('week_5', DbType.bool),
+      SqfEntityFieldBase('week_6', DbType.bool),
+      SqfEntityFieldBase('week_7', DbType.bool),
+      SqfEntityFieldBase('week_8', DbType.bool),
+      SqfEntityFieldBase('week_9', DbType.bool),
+      SqfEntityFieldBase('week_10', DbType.bool),
+      SqfEntityFieldBase('week_11', DbType.bool),
+      SqfEntityFieldBase('week_12', DbType.bool),
+    ];
+    super.init();
+  }
+  static SqfEntityTableBase? _instance;
+  static SqfEntityTableBase get getInstance {
+    return _instance = _instance ?? TableStaff_lesson_note();
+  }
+}
+
+// Plc TABLE
+class TablePlc extends SqfEntityTableBase {
+  TablePlc() {
+    // declare properties of EntityTable
+    tableName = 'plc';
+    primaryKeyName = 'id';
+    primaryKeyType = PrimaryKeyType.integer_auto_incremental;
+    useSoftDeleting = false;
+    // when useSoftDeleting is true, creates a field named 'isDeleted' on the table, and set to '1' this field when item deleted (does not hard delete)
+
+    // declare fields
+    fields = [
+      SqfEntityFieldRelationshipBase(TableStaff.getInstance, DeleteRule.CASCADE,
+          relationType: RelationType.ONE_TO_MANY,
+          fieldName: 'staffId',
+          defaultValue: 0),
+      SqfEntityFieldBase('academic_year', DbType.text),
+      SqfEntityFieldBase('term', DbType.text),
+      SqfEntityFieldBase('week_1', DbType.bool),
+      SqfEntityFieldBase('week_2', DbType.bool),
+      SqfEntityFieldBase('week_3', DbType.bool),
+      SqfEntityFieldBase('week_4', DbType.bool),
+      SqfEntityFieldBase('week_5', DbType.bool),
+      SqfEntityFieldBase('week_6', DbType.bool),
+      SqfEntityFieldBase('week_7', DbType.bool),
+      SqfEntityFieldBase('week_8', DbType.bool),
+      SqfEntityFieldBase('week_9', DbType.bool),
+      SqfEntityFieldBase('week_10', DbType.bool),
+      SqfEntityFieldBase('week_11', DbType.bool),
+      SqfEntityFieldBase('week_12', DbType.bool),
+    ];
+    super.init();
+  }
+  static SqfEntityTableBase? _instance;
+  static SqfEntityTableBase get getInstance {
+    return _instance = _instance ?? TablePlc();
+  }
+}
+
 // User TABLE
 class TableUser extends SqfEntityTableBase {
   TableUser() {
@@ -173,6 +252,8 @@ class AttendanceDbModel extends SqfEntityModelProvider {
       TableStaff.getInstance,
       TableAttendance.getInstance,
       TableDepartment.getInstance,
+      TableStaff_lesson_note.getInstance,
+      TablePlc.getInstance,
       TableUser.getInstance,
     ];
 
@@ -202,6 +283,7 @@ class Staff extends TableBase {
       this.email,
       this.phone_number,
       this.staff_id,
+      this.rank,
       this.departmentId,
       this.employment_status,
       this.join_date,
@@ -215,6 +297,7 @@ class Staff extends TableBase {
       this.email,
       this.phone_number,
       this.staff_id,
+      this.rank,
       this.departmentId,
       this.employment_status,
       this.join_date,
@@ -228,6 +311,7 @@ class Staff extends TableBase {
       this.email,
       this.phone_number,
       this.staff_id,
+      this.rank,
       this.departmentId,
       this.employment_status,
       this.join_date,
@@ -254,6 +338,9 @@ class Staff extends TableBase {
     }
     if (o['staff_id'] != null) {
       staff_id = o['staff_id'].toString();
+    }
+    if (o['rank'] != null) {
+      rank = o['rank'].toString();
     }
     departmentId = int.tryParse(o['departmentId'].toString());
 
@@ -283,6 +370,7 @@ class Staff extends TableBase {
   String? email;
   String? phone_number;
   String? staff_id;
+  String? rank;
   int? departmentId;
   String? employment_status;
   DateTime? join_date;
@@ -316,6 +404,40 @@ class Staff extends TableBase {
       return null;
     }
     return Attendance()
+        .select(columnsToSelect: columnsToSelect, getIsDeleted: getIsDeleted)
+        .staffId
+        .equals(id)
+        .and;
+  }
+
+  /// to load children of items to this field, use preload parameter. Ex: toList(preload:true) or toSingle(preload:true) or getById(preload:true)
+  /// You can also specify this object into certain preload fields!. Ex: toList(preload:true, preloadFields:['plStaff_lesson_notes', 'plField2'..]) or so on..
+  List<Staff_lesson_note>? plStaff_lesson_notes;
+
+  /// get Staff_lesson_note(s) filtered by id=staffId
+  Staff_lesson_noteFilterBuilder? getStaff_lesson_notes(
+      {List<String>? columnsToSelect, bool? getIsDeleted}) {
+    if (id == null) {
+      return null;
+    }
+    return Staff_lesson_note()
+        .select(columnsToSelect: columnsToSelect, getIsDeleted: getIsDeleted)
+        .staffId
+        .equals(id)
+        .and;
+  }
+
+  /// to load children of items to this field, use preload parameter. Ex: toList(preload:true) or toSingle(preload:true) or getById(preload:true)
+  /// You can also specify this object into certain preload fields!. Ex: toList(preload:true, preloadFields:['plPlcs', 'plField2'..]) or so on..
+  List<Plc>? plPlcs;
+
+  /// get Plc(s) filtered by id=staffId
+  PlcFilterBuilder? getPlcs(
+      {List<String>? columnsToSelect, bool? getIsDeleted}) {
+    if (id == null) {
+      return null;
+    }
+    return Plc()
         .select(columnsToSelect: columnsToSelect, getIsDeleted: getIsDeleted)
         .staffId
         .equals(id)
@@ -369,6 +491,9 @@ class Staff extends TableBase {
     if (staff_id != null || !forView) {
       map['staff_id'] = staff_id;
     }
+    if (rank != null || !forView) {
+      map['rank'] = rank;
+    }
     if (departmentId != null) {
       map['departmentId'] = forView
           ? plDepartment == null
@@ -419,6 +544,9 @@ class Staff extends TableBase {
     if (staff_id != null || !forView) {
       map['staff_id'] = staff_id;
     }
+    if (rank != null || !forView) {
+      map['rank'] = rank;
+    }
     if (departmentId != null) {
       map['departmentId'] = forView
           ? plDepartment == null
@@ -449,6 +577,12 @@ class Staff extends TableBase {
       map['Attendances'] = await getAttendances()!.toMapList();
     }
     if (!forQuery) {
+      map['Staff_lesson_notes'] = await getStaff_lesson_notes()!.toMapList();
+    }
+    if (!forQuery) {
+      map['Plcs'] = await getPlcs()!.toMapList();
+    }
+    if (!forQuery) {
       map['Users'] = await getUsers()!.toMapList();
     }
 // END COLLECTIONS (Staff)
@@ -476,6 +610,7 @@ class Staff extends TableBase {
       email,
       phone_number,
       staff_id,
+      rank,
       departmentId,
       employment_status,
       join_date != null ? join_date!.millisecondsSinceEpoch : null,
@@ -492,6 +627,7 @@ class Staff extends TableBase {
       email,
       phone_number,
       staff_id,
+      rank,
       departmentId,
       employment_status,
       join_date != null ? join_date!.millisecondsSinceEpoch : null,
@@ -555,6 +691,26 @@ class Staff extends TableBase {
                       preloadFields: preloadFields,
                       loadParents: false /*, loadedFields:_loadedFields*/);
         }
+        if (/*!_loadedfields!.contains('staff.plStaff_lesson_notes') && */ (preloadFields ==
+                null ||
+            preloadFields.contains('plStaff_lesson_notes'))) {
+          /*_loadedfields!.add('staff.plStaff_lesson_notes'); */ obj
+                  .plStaff_lesson_notes =
+              obj.plStaff_lesson_notes ??
+                  await obj.getStaff_lesson_notes()!.toList(
+                      preload: preload,
+                      preloadFields: preloadFields,
+                      loadParents: false /*, loadedFields:_loadedFields*/);
+        }
+        if (/*!_loadedfields!.contains('staff.plPlcs') && */ (preloadFields ==
+                null ||
+            preloadFields.contains('plPlcs'))) {
+          /*_loadedfields!.add('staff.plPlcs'); */ obj.plPlcs = obj.plPlcs ??
+              await obj.getPlcs()!.toList(
+                  preload: preload,
+                  preloadFields: preloadFields,
+                  loadParents: false /*, loadedFields:_loadedFields*/);
+        }
         if (/*!_loadedfields!.contains('staff.plUsers') && */ (preloadFields ==
                 null ||
             preloadFields.contains('plUsers'))) {
@@ -616,6 +772,26 @@ class Staff extends TableBase {
                       preload: preload,
                       preloadFields: preloadFields,
                       loadParents: false /*, loadedFields:_loadedFields*/);
+        }
+        if (/*!_loadedfields!.contains('staff.plStaff_lesson_notes') && */ (preloadFields ==
+                null ||
+            preloadFields.contains('plStaff_lesson_notes'))) {
+          /*_loadedfields!.add('staff.plStaff_lesson_notes'); */ obj
+                  .plStaff_lesson_notes =
+              obj.plStaff_lesson_notes ??
+                  await obj.getStaff_lesson_notes()!.toList(
+                      preload: preload,
+                      preloadFields: preloadFields,
+                      loadParents: false /*, loadedFields:_loadedFields*/);
+        }
+        if (/*!_loadedfields!.contains('staff.plPlcs') && */ (preloadFields ==
+                null ||
+            preloadFields.contains('plPlcs'))) {
+          /*_loadedfields!.add('staff.plPlcs'); */ obj.plPlcs = obj.plPlcs ??
+              await obj.getPlcs()!.toList(
+                  preload: preload,
+                  preloadFields: preloadFields,
+                  loadParents: false /*, loadedFields:_loadedFields*/);
         }
         if (/*!_loadedfields!.contains('staff.plUsers') && */ (preloadFields ==
                 null ||
@@ -715,7 +891,7 @@ class Staff extends TableBase {
   Future<int?> upsert({bool ignoreBatch = true}) async {
     try {
       final result = await _mnStaff.rawInsert(
-          'INSERT OR REPLACE INTO staff (id, first_name, last_name, email, phone_number, staff_id, departmentId, employment_status, join_date,isDeleted)  VALUES (?,?,?,?,?,?,?,?,?,?)',
+          'INSERT OR REPLACE INTO staff (id, first_name, last_name, email, phone_number, staff_id, rank, departmentId, employment_status, join_date,isDeleted)  VALUES (?,?,?,?,?,?,?,?,?,?,?)',
           [
             id,
             first_name,
@@ -723,6 +899,7 @@ class Staff extends TableBase {
             email,
             phone_number,
             staff_id,
+            rank,
             departmentId,
             employment_status,
             join_date != null ? join_date!.millisecondsSinceEpoch : null,
@@ -752,7 +929,7 @@ class Staff extends TableBase {
   Future<BoolCommitResult> upsertAll(List<Staff> staffs,
       {bool? exclusive, bool? noResult, bool? continueOnError}) async {
     final results = await _mnStaff.rawInsertAll(
-        'INSERT OR REPLACE INTO staff (id, first_name, last_name, email, phone_number, staff_id, departmentId, employment_status, join_date,isDeleted)  VALUES (?,?,?,?,?,?,?,?,?,?)',
+        'INSERT OR REPLACE INTO staff (id, first_name, last_name, email, phone_number, staff_id, rank, departmentId, employment_status, join_date,isDeleted)  VALUES (?,?,?,?,?,?,?,?,?,?,?)',
         staffs,
         exclusive: exclusive,
         noResult: noResult,
@@ -770,6 +947,23 @@ class Staff extends TableBase {
     {
       result =
           await Attendance().select().staffId.equals(id).and.delete(hardDelete);
+    }
+    if (!result.success) {
+      return result;
+    }
+    {
+      result = await Staff_lesson_note()
+          .select()
+          .staffId
+          .equals(id)
+          .and
+          .delete(hardDelete);
+    }
+    if (!result.success) {
+      return result;
+    }
+    {
+      result = await Plc().select().staffId.equals(id).and.delete(hardDelete);
     }
     if (!result.success) {
       return result;
@@ -1062,6 +1256,11 @@ class StaffFilterBuilder extends ConjunctionBase {
     return _staff_id = _setField(_staff_id, 'staff_id', DbType.text);
   }
 
+  StaffField? _rank;
+  StaffField get rank {
+    return _rank = _setField(_rank, 'rank', DbType.text);
+  }
+
   StaffField? _departmentId;
   StaffField get departmentId {
     return _departmentId =
@@ -1100,6 +1299,26 @@ class StaffFilterBuilder extends ConjunctionBase {
         .delete(hardDelete);
     if (!resAttendanceBYstaffId.success) {
       return resAttendanceBYstaffId;
+    }
+// Delete sub records where in (Staff_lesson_note) according to DeleteRule.CASCADE
+    final idListStaff_lesson_noteBYstaffId = toListPrimaryKeySQL(false);
+    final resStaff_lesson_noteBYstaffId = await Staff_lesson_note()
+        .select()
+        .where('staffId IN (${idListStaff_lesson_noteBYstaffId['sql']})',
+            parameterValue: idListStaff_lesson_noteBYstaffId['args'])
+        .delete(hardDelete);
+    if (!resStaff_lesson_noteBYstaffId.success) {
+      return resStaff_lesson_noteBYstaffId;
+    }
+// Delete sub records where in (Plc) according to DeleteRule.CASCADE
+    final idListPlcBYstaffId = toListPrimaryKeySQL(false);
+    final resPlcBYstaffId = await Plc()
+        .select()
+        .where('staffId IN (${idListPlcBYstaffId['sql']})',
+            parameterValue: idListPlcBYstaffId['args'])
+        .delete(hardDelete);
+    if (!resPlcBYstaffId.success) {
+      return resPlcBYstaffId;
     }
 // UPDATE sub records where in (User) according to DeleteRule.SET_NULL
     final idListUserBYstaffId = toListPrimaryKeySQL(false);
@@ -1174,6 +1393,26 @@ class StaffFilterBuilder extends ConjunctionBase {
                       preload: preload,
                       preloadFields: preloadFields,
                       loadParents: false /*, loadedFields:_loadedFields*/);
+        }
+        if (/*!_loadedfields!.contains('staff.plStaff_lesson_notes') && */ (preloadFields ==
+                null ||
+            preloadFields.contains('plStaff_lesson_notes'))) {
+          /*_loadedfields!.add('staff.plStaff_lesson_notes'); */ obj
+                  .plStaff_lesson_notes =
+              obj.plStaff_lesson_notes ??
+                  await obj.getStaff_lesson_notes()!.toList(
+                      preload: preload,
+                      preloadFields: preloadFields,
+                      loadParents: false /*, loadedFields:_loadedFields*/);
+        }
+        if (/*!_loadedfields!.contains('staff.plPlcs') && */ (preloadFields ==
+                null ||
+            preloadFields.contains('plPlcs'))) {
+          /*_loadedfields!.add('staff.plPlcs'); */ obj.plPlcs = obj.plPlcs ??
+              await obj.getPlcs()!.toList(
+                  preload: preload,
+                  preloadFields: preloadFields,
+                  loadParents: false /*, loadedFields:_loadedFields*/);
         }
         if (/*!_loadedfields!.contains('staff.plUsers') && */ (preloadFields ==
                 null ||
@@ -1399,6 +1638,11 @@ class StaffFields {
   static TableField get staff_id {
     return _fStaff_id =
         _fStaff_id ?? SqlSyntax.setField(_fStaff_id, 'staff_id', DbType.text);
+  }
+
+  static TableField? _fRank;
+  static TableField get rank {
+    return _fRank = _fRank ?? SqlSyntax.setField(_fRank, 'rank', DbType.text);
   }
 
   static TableField? _fDepartmentId;
@@ -3370,6 +3614,2580 @@ class DepartmentManager extends SqfEntityProvider {
 }
 
 //endregion DepartmentManager
+// region Staff_lesson_note
+class Staff_lesson_note extends TableBase {
+  Staff_lesson_note(
+      {this.id,
+      this.staffId,
+      this.academic_year,
+      this.term,
+      this.week_1,
+      this.week_2,
+      this.week_3,
+      this.week_4,
+      this.week_5,
+      this.week_6,
+      this.week_7,
+      this.week_8,
+      this.week_9,
+      this.week_10,
+      this.week_11,
+      this.week_12}) {
+    _setDefaultValues();
+    softDeleteActivated = false;
+  }
+  Staff_lesson_note.withFields(
+      this.staffId,
+      this.academic_year,
+      this.term,
+      this.week_1,
+      this.week_2,
+      this.week_3,
+      this.week_4,
+      this.week_5,
+      this.week_6,
+      this.week_7,
+      this.week_8,
+      this.week_9,
+      this.week_10,
+      this.week_11,
+      this.week_12) {
+    _setDefaultValues();
+  }
+  Staff_lesson_note.withId(
+      this.id,
+      this.staffId,
+      this.academic_year,
+      this.term,
+      this.week_1,
+      this.week_2,
+      this.week_3,
+      this.week_4,
+      this.week_5,
+      this.week_6,
+      this.week_7,
+      this.week_8,
+      this.week_9,
+      this.week_10,
+      this.week_11,
+      this.week_12) {
+    _setDefaultValues();
+  }
+  // fromMap v2.0
+  Staff_lesson_note.fromMap(Map<String, dynamic> o,
+      {bool setDefaultValues = true}) {
+    if (setDefaultValues) {
+      _setDefaultValues();
+    }
+    id = int.tryParse(o['id'].toString());
+    staffId = int.tryParse(o['staffId'].toString());
+
+    if (o['academic_year'] != null) {
+      academic_year = o['academic_year'].toString();
+    }
+    if (o['term'] != null) {
+      term = o['term'].toString();
+    }
+    if (o['week_1'] != null) {
+      week_1 =
+          o['week_1'].toString() == '1' || o['week_1'].toString() == 'true';
+    }
+    if (o['week_2'] != null) {
+      week_2 =
+          o['week_2'].toString() == '1' || o['week_2'].toString() == 'true';
+    }
+    if (o['week_3'] != null) {
+      week_3 =
+          o['week_3'].toString() == '1' || o['week_3'].toString() == 'true';
+    }
+    if (o['week_4'] != null) {
+      week_4 =
+          o['week_4'].toString() == '1' || o['week_4'].toString() == 'true';
+    }
+    if (o['week_5'] != null) {
+      week_5 =
+          o['week_5'].toString() == '1' || o['week_5'].toString() == 'true';
+    }
+    if (o['week_6'] != null) {
+      week_6 =
+          o['week_6'].toString() == '1' || o['week_6'].toString() == 'true';
+    }
+    if (o['week_7'] != null) {
+      week_7 =
+          o['week_7'].toString() == '1' || o['week_7'].toString() == 'true';
+    }
+    if (o['week_8'] != null) {
+      week_8 =
+          o['week_8'].toString() == '1' || o['week_8'].toString() == 'true';
+    }
+    if (o['week_9'] != null) {
+      week_9 =
+          o['week_9'].toString() == '1' || o['week_9'].toString() == 'true';
+    }
+    if (o['week_10'] != null) {
+      week_10 =
+          o['week_10'].toString() == '1' || o['week_10'].toString() == 'true';
+    }
+    if (o['week_11'] != null) {
+      week_11 =
+          o['week_11'].toString() == '1' || o['week_11'].toString() == 'true';
+    }
+    if (o['week_12'] != null) {
+      week_12 =
+          o['week_12'].toString() == '1' || o['week_12'].toString() == 'true';
+    }
+
+    // RELATIONSHIPS FromMAP
+    plStaff = o['staff'] != null
+        ? Staff.fromMap(o['staff'] as Map<String, dynamic>)
+        : null;
+    // END RELATIONSHIPS FromMAP
+  }
+  // FIELDS (Staff_lesson_note)
+  int? id;
+  int? staffId;
+  String? academic_year;
+  String? term;
+  bool? week_1;
+  bool? week_2;
+  bool? week_3;
+  bool? week_4;
+  bool? week_5;
+  bool? week_6;
+  bool? week_7;
+  bool? week_8;
+  bool? week_9;
+  bool? week_10;
+  bool? week_11;
+  bool? week_12;
+
+  // end FIELDS (Staff_lesson_note)
+
+// RELATIONSHIPS (Staff_lesson_note)
+  /// to load parent of items to this field, use preload parameter ex: toList(preload:true) or toSingle(preload:true) or getById(preload:true)
+  /// You can also specify this object into certain preload fields!. Ex: toList(preload:true, preloadFields:['plStaff', 'plField2'..]) or so on..
+  Staff? plStaff;
+
+  /// get Staff By StaffId
+  Future<Staff?> getStaff(
+      {bool loadParents = false, List<String>? loadedFields}) async {
+    final _obj = await Staff()
+        .getById(staffId, loadParents: loadParents, loadedFields: loadedFields);
+    return _obj;
+  }
+  // END RELATIONSHIPS (Staff_lesson_note)
+
+  static const bool _softDeleteActivated = false;
+  Staff_lesson_noteManager? __mnStaff_lesson_note;
+
+  Staff_lesson_noteManager get _mnStaff_lesson_note {
+    return __mnStaff_lesson_note =
+        __mnStaff_lesson_note ?? Staff_lesson_noteManager();
+  }
+
+  // METHODS
+  @override
+  Map<String, dynamic> toMap(
+      {bool forQuery = false, bool forJson = false, bool forView = false}) {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    if (staffId != null) {
+      map['staffId'] = forView
+          ? plStaff == null
+              ? staffId
+              : plStaff!.first_name
+          : staffId;
+    } else if (staffId != null || !forView) {
+      map['staffId'] = null;
+    }
+    if (academic_year != null || !forView) {
+      map['academic_year'] = academic_year;
+    }
+    if (term != null || !forView) {
+      map['term'] = term;
+    }
+    if (week_1 != null) {
+      map['week_1'] = forQuery ? (week_1! ? 1 : 0) : week_1;
+    } else if (week_1 != null || !forView) {
+      map['week_1'] = null;
+    }
+    if (week_2 != null) {
+      map['week_2'] = forQuery ? (week_2! ? 1 : 0) : week_2;
+    } else if (week_2 != null || !forView) {
+      map['week_2'] = null;
+    }
+    if (week_3 != null) {
+      map['week_3'] = forQuery ? (week_3! ? 1 : 0) : week_3;
+    } else if (week_3 != null || !forView) {
+      map['week_3'] = null;
+    }
+    if (week_4 != null) {
+      map['week_4'] = forQuery ? (week_4! ? 1 : 0) : week_4;
+    } else if (week_4 != null || !forView) {
+      map['week_4'] = null;
+    }
+    if (week_5 != null) {
+      map['week_5'] = forQuery ? (week_5! ? 1 : 0) : week_5;
+    } else if (week_5 != null || !forView) {
+      map['week_5'] = null;
+    }
+    if (week_6 != null) {
+      map['week_6'] = forQuery ? (week_6! ? 1 : 0) : week_6;
+    } else if (week_6 != null || !forView) {
+      map['week_6'] = null;
+    }
+    if (week_7 != null) {
+      map['week_7'] = forQuery ? (week_7! ? 1 : 0) : week_7;
+    } else if (week_7 != null || !forView) {
+      map['week_7'] = null;
+    }
+    if (week_8 != null) {
+      map['week_8'] = forQuery ? (week_8! ? 1 : 0) : week_8;
+    } else if (week_8 != null || !forView) {
+      map['week_8'] = null;
+    }
+    if (week_9 != null) {
+      map['week_9'] = forQuery ? (week_9! ? 1 : 0) : week_9;
+    } else if (week_9 != null || !forView) {
+      map['week_9'] = null;
+    }
+    if (week_10 != null) {
+      map['week_10'] = forQuery ? (week_10! ? 1 : 0) : week_10;
+    } else if (week_10 != null || !forView) {
+      map['week_10'] = null;
+    }
+    if (week_11 != null) {
+      map['week_11'] = forQuery ? (week_11! ? 1 : 0) : week_11;
+    } else if (week_11 != null || !forView) {
+      map['week_11'] = null;
+    }
+    if (week_12 != null) {
+      map['week_12'] = forQuery ? (week_12! ? 1 : 0) : week_12;
+    } else if (week_12 != null || !forView) {
+      map['week_12'] = null;
+    }
+
+    return map;
+  }
+
+  @override
+  Future<Map<String, dynamic>> toMapWithChildren(
+      [bool forQuery = false,
+      bool forJson = false,
+      bool forView = false]) async {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    if (staffId != null) {
+      map['staffId'] = forView
+          ? plStaff == null
+              ? staffId
+              : plStaff!.first_name
+          : staffId;
+    } else if (staffId != null || !forView) {
+      map['staffId'] = null;
+    }
+    if (academic_year != null || !forView) {
+      map['academic_year'] = academic_year;
+    }
+    if (term != null || !forView) {
+      map['term'] = term;
+    }
+    if (week_1 != null) {
+      map['week_1'] = forQuery ? (week_1! ? 1 : 0) : week_1;
+    } else if (week_1 != null || !forView) {
+      map['week_1'] = null;
+    }
+    if (week_2 != null) {
+      map['week_2'] = forQuery ? (week_2! ? 1 : 0) : week_2;
+    } else if (week_2 != null || !forView) {
+      map['week_2'] = null;
+    }
+    if (week_3 != null) {
+      map['week_3'] = forQuery ? (week_3! ? 1 : 0) : week_3;
+    } else if (week_3 != null || !forView) {
+      map['week_3'] = null;
+    }
+    if (week_4 != null) {
+      map['week_4'] = forQuery ? (week_4! ? 1 : 0) : week_4;
+    } else if (week_4 != null || !forView) {
+      map['week_4'] = null;
+    }
+    if (week_5 != null) {
+      map['week_5'] = forQuery ? (week_5! ? 1 : 0) : week_5;
+    } else if (week_5 != null || !forView) {
+      map['week_5'] = null;
+    }
+    if (week_6 != null) {
+      map['week_6'] = forQuery ? (week_6! ? 1 : 0) : week_6;
+    } else if (week_6 != null || !forView) {
+      map['week_6'] = null;
+    }
+    if (week_7 != null) {
+      map['week_7'] = forQuery ? (week_7! ? 1 : 0) : week_7;
+    } else if (week_7 != null || !forView) {
+      map['week_7'] = null;
+    }
+    if (week_8 != null) {
+      map['week_8'] = forQuery ? (week_8! ? 1 : 0) : week_8;
+    } else if (week_8 != null || !forView) {
+      map['week_8'] = null;
+    }
+    if (week_9 != null) {
+      map['week_9'] = forQuery ? (week_9! ? 1 : 0) : week_9;
+    } else if (week_9 != null || !forView) {
+      map['week_9'] = null;
+    }
+    if (week_10 != null) {
+      map['week_10'] = forQuery ? (week_10! ? 1 : 0) : week_10;
+    } else if (week_10 != null || !forView) {
+      map['week_10'] = null;
+    }
+    if (week_11 != null) {
+      map['week_11'] = forQuery ? (week_11! ? 1 : 0) : week_11;
+    } else if (week_11 != null || !forView) {
+      map['week_11'] = null;
+    }
+    if (week_12 != null) {
+      map['week_12'] = forQuery ? (week_12! ? 1 : 0) : week_12;
+    } else if (week_12 != null || !forView) {
+      map['week_12'] = null;
+    }
+
+    return map;
+  }
+
+  /// This method returns Json String [Staff_lesson_note]
+  @override
+  String toJson() {
+    return json.encode(toMap(forJson: true));
+  }
+
+  /// This method returns Json String [Staff_lesson_note]
+  @override
+  Future<String> toJsonWithChilds() async {
+    return json.encode(await toMapWithChildren(false, true));
+  }
+
+  @override
+  List<dynamic> toArgs() {
+    return [
+      staffId,
+      academic_year,
+      term,
+      week_1,
+      week_2,
+      week_3,
+      week_4,
+      week_5,
+      week_6,
+      week_7,
+      week_8,
+      week_9,
+      week_10,
+      week_11,
+      week_12
+    ];
+  }
+
+  @override
+  List<dynamic> toArgsWithIds() {
+    return [
+      id,
+      staffId,
+      academic_year,
+      term,
+      week_1,
+      week_2,
+      week_3,
+      week_4,
+      week_5,
+      week_6,
+      week_7,
+      week_8,
+      week_9,
+      week_10,
+      week_11,
+      week_12
+    ];
+  }
+
+  static Future<List<Staff_lesson_note>?> fromWebUrl(Uri uri,
+      {Map<String, String>? headers}) async {
+    try {
+      final response = await http.get(uri, headers: headers);
+      return await fromJson(response.body);
+    } catch (e) {
+      debugPrint(
+          'SQFENTITY ERROR Staff_lesson_note.fromWebUrl: ErrorMessage: ${e.toString()}');
+      return null;
+    }
+  }
+
+  Future<http.Response> postUrl(Uri uri, {Map<String, String>? headers}) {
+    return http.post(uri, headers: headers, body: toJson());
+  }
+
+  static Future<List<Staff_lesson_note>> fromJson(String jsonBody) async {
+    final Iterable list = await json.decode(jsonBody) as Iterable;
+    var objList = <Staff_lesson_note>[];
+    try {
+      objList = list
+          .map((staff_lesson_note) => Staff_lesson_note.fromMap(
+              staff_lesson_note as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      debugPrint(
+          'SQFENTITY ERROR Staff_lesson_note.fromJson: ErrorMessage: ${e.toString()}');
+    }
+    return objList;
+  }
+
+  static Future<List<Staff_lesson_note>> fromMapList(List<dynamic> data,
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields,
+      bool setDefaultValues = true}) async {
+    final List<Staff_lesson_note> objList = <Staff_lesson_note>[];
+    loadedFields = loadedFields ?? [];
+    for (final map in data) {
+      final obj = Staff_lesson_note.fromMap(map as Map<String, dynamic>,
+          setDefaultValues: setDefaultValues);
+      // final List<String> _loadedFields = List<String>.from(loadedFields);
+
+      // RELATIONSHIPS PRELOAD
+      if (preload || loadParents) {
+        loadedFields = loadedFields ?? [];
+        if ((preloadFields == null ||
+            loadParents ||
+            preloadFields.contains('plStaff'))) {
+          obj.plStaff =
+              obj.plStaff ?? await obj.getStaff(loadParents: loadParents);
+        }
+      } // END RELATIONSHIPS PRELOAD
+
+      objList.add(obj);
+    }
+    return objList;
+  }
+
+  /// returns Staff_lesson_note by ID if exist, otherwise returns null
+  /// Primary Keys: int? id
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: getById(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: getById(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns>returns [Staff_lesson_note] if exist, otherwise returns null
+  Future<Staff_lesson_note?> getById(int? id,
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    if (id == null) {
+      return null;
+    }
+    Staff_lesson_note? obj;
+    final data = await _mnStaff_lesson_note.getById([id]);
+    if (data.length != 0) {
+      obj = Staff_lesson_note.fromMap(data[0] as Map<String, dynamic>);
+
+      // RELATIONSHIPS PRELOAD
+      if (preload || loadParents) {
+        loadedFields = loadedFields ?? [];
+        if ((preloadFields == null ||
+            loadParents ||
+            preloadFields.contains('plStaff'))) {
+          obj.plStaff =
+              obj.plStaff ?? await obj.getStaff(loadParents: loadParents);
+        }
+      } // END RELATIONSHIPS PRELOAD
+    } else {
+      obj = null;
+    }
+    return obj;
+  }
+
+  /// Saves the (Staff_lesson_note) object. If the id field is null, saves as a new record and returns new id, if id is not null then updates record
+  /// ignoreBatch = true as a default. Set ignoreBatch to false if you run more than one save() operation those are between batchStart and batchCommit
+  /// <returns>Returns id
+  @override
+  Future<int?> save({bool ignoreBatch = true}) async {
+    if (id == null || id == 0) {
+      id = await _mnStaff_lesson_note.insert(this, ignoreBatch);
+    } else {
+      await _mnStaff_lesson_note.update(this);
+    }
+
+    return id;
+  }
+
+  /// Saves the (Staff_lesson_note) object. If the id field is null, saves as a new record and returns new id, if id is not null then updates record
+  /// ignoreBatch = true as a default. Set ignoreBatch to false if you run more than one save() operation those are between batchStart and batchCommit
+  /// <returns>Returns id
+  @override
+  Future<int?> saveOrThrow({bool ignoreBatch = true}) async {
+    if (id == null || id == 0) {
+      id = await _mnStaff_lesson_note.insertOrThrow(this, ignoreBatch);
+
+      isInsert = true;
+    } else {
+      // id= await _upsert(); // removed in sqfentity_gen 1.3.0+6
+      await _mnStaff_lesson_note.updateOrThrow(this);
+    }
+
+    return id;
+  }
+
+  /// saveAs Staff_lesson_note. Returns a new Primary Key value of Staff_lesson_note
+
+  /// <returns>Returns a new Primary Key value of Staff_lesson_note
+  @override
+  Future<int?> saveAs({bool ignoreBatch = true}) async {
+    id = null;
+
+    return save(ignoreBatch: ignoreBatch);
+  }
+
+  /// saveAll method saves the sent List<Staff_lesson_note> as a bulk in one transaction
+  /// Returns a <List<BoolResult>>
+  static Future<List<dynamic>> saveAll(
+      List<Staff_lesson_note> staff_lesson_notes,
+      {bool? exclusive,
+      bool? noResult,
+      bool? continueOnError}) async {
+    List<dynamic>? result = [];
+    // If there is no open transaction, start one
+    final isStartedBatch = await AttendanceDbModel().batchStart();
+    for (final obj in staff_lesson_notes) {
+      await obj.save(ignoreBatch: false);
+    }
+    if (!isStartedBatch) {
+      result = await AttendanceDbModel().batchCommit(
+          exclusive: exclusive,
+          noResult: noResult,
+          continueOnError: continueOnError);
+      for (int i = 0; i < staff_lesson_notes.length; i++) {
+        if (staff_lesson_notes[i].id == null) {
+          staff_lesson_notes[i].id = result![i] as int;
+        }
+      }
+    }
+    return result!;
+  }
+
+  /// Updates if the record exists, otherwise adds a new row
+  /// <returns>Returns id
+  @override
+  Future<int?> upsert({bool ignoreBatch = true}) async {
+    try {
+      final result = await _mnStaff_lesson_note.rawInsert(
+          'INSERT OR REPLACE INTO staff_lesson_note (id, staffId, academic_year, term, week_1, week_2, week_3, week_4, week_5, week_6, week_7, week_8, week_9, week_10, week_11, week_12)  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+          [
+            id,
+            staffId,
+            academic_year,
+            term,
+            week_1,
+            week_2,
+            week_3,
+            week_4,
+            week_5,
+            week_6,
+            week_7,
+            week_8,
+            week_9,
+            week_10,
+            week_11,
+            week_12
+          ],
+          ignoreBatch);
+      if (result! > 0) {
+        saveResult = BoolResult(
+            success: true,
+            successMessage: 'Staff_lesson_note id=$id updated successfully');
+      } else {
+        saveResult = BoolResult(
+            success: false,
+            errorMessage: 'Staff_lesson_note id=$id did not update');
+      }
+      return id;
+    } catch (e) {
+      saveResult = BoolResult(
+          success: false,
+          errorMessage:
+              'Staff_lesson_note Save failed. Error: ${e.toString()}');
+      return null;
+    }
+  }
+
+  /// inserts or replaces the sent List<<Staff_lesson_note>> as a bulk in one transaction.
+  /// upsertAll() method is faster then saveAll() method. upsertAll() should be used when you are sure that the primary key is greater than zero
+  /// Returns a BoolCommitResult
+  @override
+  Future<BoolCommitResult> upsertAll(List<Staff_lesson_note> staff_lesson_notes,
+      {bool? exclusive, bool? noResult, bool? continueOnError}) async {
+    final results = await _mnStaff_lesson_note.rawInsertAll(
+        'INSERT OR REPLACE INTO staff_lesson_note (id, staffId, academic_year, term, week_1, week_2, week_3, week_4, week_5, week_6, week_7, week_8, week_9, week_10, week_11, week_12)  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        staff_lesson_notes,
+        exclusive: exclusive,
+        noResult: noResult,
+        continueOnError: continueOnError);
+    return results;
+  }
+
+  /// Deletes Staff_lesson_note
+
+  /// <returns>BoolResult res.success= true (Deleted), false (Could not be deleted)
+  @override
+  Future<BoolResult> delete([bool hardDelete = false]) async {
+    debugPrint('SQFENTITIY: delete Staff_lesson_note invoked (id=$id)');
+    if (!_softDeleteActivated || hardDelete) {
+      return _mnStaff_lesson_note
+          .delete(QueryParams(whereString: 'id=?', whereArguments: [id]));
+    } else {
+      return _mnStaff_lesson_note.updateBatch(
+          QueryParams(whereString: 'id=?', whereArguments: [id]),
+          {'isDeleted': 1});
+    }
+  }
+
+  @override
+  Future<BoolResult> recover([bool recoverChilds = true]) {
+    // not implemented because:
+    final msg =
+        'set useSoftDeleting:true in the table definition of [Staff_lesson_note] to use this feature';
+    throw UnimplementedError(msg);
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder select(
+      {List<String>? columnsToSelect, bool? getIsDeleted}) {
+    return Staff_lesson_noteFilterBuilder(this, getIsDeleted)
+      ..qparams.selectColumns = columnsToSelect;
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder distinct(
+      {List<String>? columnsToSelect, bool? getIsDeleted}) {
+    return Staff_lesson_noteFilterBuilder(this, getIsDeleted)
+      ..qparams.selectColumns = columnsToSelect
+      ..qparams.distinct = true;
+  }
+
+  void _setDefaultValues() {
+    staffId = staffId ?? 0;
+  }
+
+  @override
+  void rollbackPk() {
+    if (isInsert == true) {
+      id = null;
+    }
+  }
+
+  // END METHODS
+  // BEGIN CUSTOM CODE
+  /*
+      you can define customCode property of your SqfEntityTable constant. For example:
+      const tablePerson = SqfEntityTable(
+      tableName: 'person',
+      primaryKeyName: 'id',
+      primaryKeyType: PrimaryKeyType.integer_auto_incremental,
+      fields: [
+        SqfEntityField('firstName', DbType.text),
+        SqfEntityField('lastName', DbType.text),
+      ],
+      customCode: '''
+       String fullName()
+       { 
+         return '$firstName $lastName';
+       }
+      ''');
+     */
+  // END CUSTOM CODE
+}
+// endregion staff_lesson_note
+
+// region Staff_lesson_noteField
+class Staff_lesson_noteField extends FilterBase {
+  Staff_lesson_noteField(Staff_lesson_noteFilterBuilder staff_lesson_noteFB)
+      : super(staff_lesson_noteFB);
+
+  @override
+  Staff_lesson_noteFilterBuilder equals(dynamic pValue) {
+    return super.equals(pValue) as Staff_lesson_noteFilterBuilder;
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder equalsOrNull(dynamic pValue) {
+    return super.equalsOrNull(pValue) as Staff_lesson_noteFilterBuilder;
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder isNull() {
+    return super.isNull() as Staff_lesson_noteFilterBuilder;
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder contains(dynamic pValue) {
+    return super.contains(pValue) as Staff_lesson_noteFilterBuilder;
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder startsWith(dynamic pValue) {
+    return super.startsWith(pValue) as Staff_lesson_noteFilterBuilder;
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder endsWith(dynamic pValue) {
+    return super.endsWith(pValue) as Staff_lesson_noteFilterBuilder;
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder between(dynamic pFirst, dynamic pLast) {
+    return super.between(pFirst, pLast) as Staff_lesson_noteFilterBuilder;
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder greaterThan(dynamic pValue) {
+    return super.greaterThan(pValue) as Staff_lesson_noteFilterBuilder;
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder lessThan(dynamic pValue) {
+    return super.lessThan(pValue) as Staff_lesson_noteFilterBuilder;
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder greaterThanOrEquals(dynamic pValue) {
+    return super.greaterThanOrEquals(pValue) as Staff_lesson_noteFilterBuilder;
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder lessThanOrEquals(dynamic pValue) {
+    return super.lessThanOrEquals(pValue) as Staff_lesson_noteFilterBuilder;
+  }
+
+  @override
+  Staff_lesson_noteFilterBuilder inValues(dynamic pValue) {
+    return super.inValues(pValue) as Staff_lesson_noteFilterBuilder;
+  }
+
+  @override
+  Staff_lesson_noteField get not {
+    return super.not as Staff_lesson_noteField;
+  }
+}
+// endregion Staff_lesson_noteField
+
+// region Staff_lesson_noteFilterBuilder
+class Staff_lesson_noteFilterBuilder extends ConjunctionBase {
+  Staff_lesson_noteFilterBuilder(Staff_lesson_note obj, bool? getIsDeleted)
+      : super(obj, getIsDeleted) {
+    _mnStaff_lesson_note = obj._mnStaff_lesson_note;
+    _softDeleteActivated = obj.softDeleteActivated;
+  }
+
+  bool _softDeleteActivated = false;
+  Staff_lesson_noteManager? _mnStaff_lesson_note;
+
+  /// put the sql keyword 'AND'
+  @override
+  Staff_lesson_noteFilterBuilder get and {
+    super.and;
+    return this;
+  }
+
+  /// put the sql keyword 'OR'
+  @override
+  Staff_lesson_noteFilterBuilder get or {
+    super.or;
+    return this;
+  }
+
+  /// open parentheses
+  @override
+  Staff_lesson_noteFilterBuilder get startBlock {
+    super.startBlock;
+    return this;
+  }
+
+  /// String whereCriteria, write raw query without 'where' keyword. Like this: 'field1 like 'test%' and field2 = 3'
+  @override
+  Staff_lesson_noteFilterBuilder where(String? whereCriteria,
+      {dynamic parameterValue}) {
+    super.where(whereCriteria, parameterValue: parameterValue);
+    return this;
+  }
+
+  /// page = page number,
+  /// pagesize = row(s) per page
+  @override
+  Staff_lesson_noteFilterBuilder page(int page, int pagesize) {
+    super.page(page, pagesize);
+    return this;
+  }
+
+  /// int count = LIMIT
+  @override
+  Staff_lesson_noteFilterBuilder top(int count) {
+    super.top(count);
+    return this;
+  }
+
+  /// close parentheses
+  @override
+  Staff_lesson_noteFilterBuilder get endBlock {
+    super.endBlock;
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='name, date'
+  /// Example 2: argFields = ['name', 'date']
+  @override
+  Staff_lesson_noteFilterBuilder orderBy(dynamic argFields) {
+    super.orderBy(argFields);
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='field1, field2'
+  /// Example 2: argFields = ['field1', 'field2']
+  @override
+  Staff_lesson_noteFilterBuilder orderByDesc(dynamic argFields) {
+    super.orderByDesc(argFields);
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='field1, field2'
+  /// Example 2: argFields = ['field1', 'field2']
+  @override
+  Staff_lesson_noteFilterBuilder groupBy(dynamic argFields) {
+    super.groupBy(argFields);
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='name, date'
+  /// Example 2: argFields = ['name', 'date']
+  @override
+  Staff_lesson_noteFilterBuilder having(dynamic argFields) {
+    super.having(argFields);
+    return this;
+  }
+
+  Staff_lesson_noteField _setField(
+      Staff_lesson_noteField? field, String colName, DbType dbtype) {
+    return Staff_lesson_noteField(this)
+      ..param = DbParameter(
+          dbType: dbtype, columnName: colName, wStartBlock: openedBlock);
+  }
+
+  Staff_lesson_noteField? _id;
+  Staff_lesson_noteField get id {
+    return _id = _setField(_id, 'id', DbType.integer);
+  }
+
+  Staff_lesson_noteField? _staffId;
+  Staff_lesson_noteField get staffId {
+    return _staffId = _setField(_staffId, 'staffId', DbType.integer);
+  }
+
+  Staff_lesson_noteField? _academic_year;
+  Staff_lesson_noteField get academic_year {
+    return _academic_year =
+        _setField(_academic_year, 'academic_year', DbType.text);
+  }
+
+  Staff_lesson_noteField? _term;
+  Staff_lesson_noteField get term {
+    return _term = _setField(_term, 'term', DbType.text);
+  }
+
+  Staff_lesson_noteField? _week_1;
+  Staff_lesson_noteField get week_1 {
+    return _week_1 = _setField(_week_1, 'week_1', DbType.bool);
+  }
+
+  Staff_lesson_noteField? _week_2;
+  Staff_lesson_noteField get week_2 {
+    return _week_2 = _setField(_week_2, 'week_2', DbType.bool);
+  }
+
+  Staff_lesson_noteField? _week_3;
+  Staff_lesson_noteField get week_3 {
+    return _week_3 = _setField(_week_3, 'week_3', DbType.bool);
+  }
+
+  Staff_lesson_noteField? _week_4;
+  Staff_lesson_noteField get week_4 {
+    return _week_4 = _setField(_week_4, 'week_4', DbType.bool);
+  }
+
+  Staff_lesson_noteField? _week_5;
+  Staff_lesson_noteField get week_5 {
+    return _week_5 = _setField(_week_5, 'week_5', DbType.bool);
+  }
+
+  Staff_lesson_noteField? _week_6;
+  Staff_lesson_noteField get week_6 {
+    return _week_6 = _setField(_week_6, 'week_6', DbType.bool);
+  }
+
+  Staff_lesson_noteField? _week_7;
+  Staff_lesson_noteField get week_7 {
+    return _week_7 = _setField(_week_7, 'week_7', DbType.bool);
+  }
+
+  Staff_lesson_noteField? _week_8;
+  Staff_lesson_noteField get week_8 {
+    return _week_8 = _setField(_week_8, 'week_8', DbType.bool);
+  }
+
+  Staff_lesson_noteField? _week_9;
+  Staff_lesson_noteField get week_9 {
+    return _week_9 = _setField(_week_9, 'week_9', DbType.bool);
+  }
+
+  Staff_lesson_noteField? _week_10;
+  Staff_lesson_noteField get week_10 {
+    return _week_10 = _setField(_week_10, 'week_10', DbType.bool);
+  }
+
+  Staff_lesson_noteField? _week_11;
+  Staff_lesson_noteField get week_11 {
+    return _week_11 = _setField(_week_11, 'week_11', DbType.bool);
+  }
+
+  Staff_lesson_noteField? _week_12;
+  Staff_lesson_noteField get week_12 {
+    return _week_12 = _setField(_week_12, 'week_12', DbType.bool);
+  }
+
+  /// Deletes List<Staff_lesson_note> bulk by query
+  ///
+  /// <returns>BoolResult res.success= true (Deleted), false (Could not be deleted)
+  @override
+  Future<BoolResult> delete([bool hardDelete = false]) async {
+    buildParameters();
+    var r = BoolResult(success: false);
+
+    if (_softDeleteActivated && !hardDelete) {
+      r = await _mnStaff_lesson_note!.updateBatch(qparams, {'isDeleted': 1});
+    } else {
+      r = await _mnStaff_lesson_note!.delete(qparams);
+    }
+    return r;
+  }
+
+  /// using:
+  /// update({'fieldName': Value})
+  /// fieldName must be String. Value is dynamic, it can be any of the (int, bool, String.. )
+  @override
+  Future<BoolResult> update(Map<String, dynamic> values) {
+    buildParameters();
+    if (qparams.limit! > 0 || qparams.offset! > 0) {
+      qparams.whereString =
+          'id IN (SELECT id from staff_lesson_note ${qparams.whereString!.isNotEmpty ? 'WHERE ${qparams.whereString}' : ''}${qparams.limit! > 0 ? ' LIMIT ${qparams.limit}' : ''}${qparams.offset! > 0 ? ' OFFSET ${qparams.offset}' : ''})';
+    }
+    return _mnStaff_lesson_note!.updateBatch(qparams, values);
+  }
+
+  /// This method always returns [Staff_lesson_note] Obj if exist, otherwise returns null
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: toSingle(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: toSingle(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns> Staff_lesson_note?
+  @override
+  Future<Staff_lesson_note?> toSingle(
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    buildParameters(pSize: 1);
+    final objFuture = _mnStaff_lesson_note!.toList(qparams);
+    final data = await objFuture;
+    Staff_lesson_note? obj;
+    if (data.isNotEmpty) {
+      obj = Staff_lesson_note.fromMap(data[0] as Map<String, dynamic>);
+
+      // RELATIONSHIPS PRELOAD
+      if (preload || loadParents) {
+        loadedFields = loadedFields ?? [];
+        if ((preloadFields == null ||
+            loadParents ||
+            preloadFields.contains('plStaff'))) {
+          obj.plStaff =
+              obj.plStaff ?? await obj.getStaff(loadParents: loadParents);
+        }
+      } // END RELATIONSHIPS PRELOAD
+    } else {
+      obj = null;
+    }
+    return obj;
+  }
+
+  /// This method always returns [Staff_lesson_note]
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: toSingle(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: toSingle(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns> Staff_lesson_note?
+  @override
+  Future<Staff_lesson_note> toSingleOrDefault(
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    return await toSingle(
+            preload: preload,
+            preloadFields: preloadFields,
+            loadParents: loadParents,
+            loadedFields: loadedFields) ??
+        Staff_lesson_note();
+  }
+
+  /// This method returns int. [Staff_lesson_note]
+  /// <returns>int
+  @override
+  Future<int> toCount(
+      [VoidCallback Function(int c)? staff_lesson_noteCount]) async {
+    buildParameters();
+    qparams.selectColumns = ['COUNT(1) AS CNT'];
+    final staff_lesson_notesFuture =
+        await _mnStaff_lesson_note!.toList(qparams);
+    final int count = staff_lesson_notesFuture[0]['CNT'] as int;
+    if (staff_lesson_noteCount != null) {
+      staff_lesson_noteCount(count);
+    }
+    return count;
+  }
+
+  /// This method returns List<Staff_lesson_note> [Staff_lesson_note]
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: toList(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: toList(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns>List<Staff_lesson_note>
+  @override
+  Future<List<Staff_lesson_note>> toList(
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    final data = await toMapList();
+    final List<Staff_lesson_note> staff_lesson_notesData =
+        await Staff_lesson_note.fromMapList(data,
+            preload: preload,
+            preloadFields: preloadFields,
+            loadParents: loadParents,
+            loadedFields: loadedFields,
+            setDefaultValues: qparams.selectColumns == null);
+    return staff_lesson_notesData;
+  }
+
+  /// This method returns Json String [Staff_lesson_note]
+  @override
+  Future<String> toJson() async {
+    final list = <dynamic>[];
+    final data = await toList();
+    for (var o in data) {
+      list.add(o.toMap(forJson: true));
+    }
+    return json.encode(list);
+  }
+
+  /// This method returns Json String. [Staff_lesson_note]
+  @override
+  Future<String> toJsonWithChilds() async {
+    final list = <dynamic>[];
+    final data = await toList();
+    for (var o in data) {
+      list.add(await o.toMapWithChildren(false, true));
+    }
+    return json.encode(list);
+  }
+
+  /// This method returns List<dynamic>. [Staff_lesson_note]
+  /// <returns>List<dynamic>
+  @override
+  Future<List<dynamic>> toMapList() async {
+    buildParameters();
+    return await _mnStaff_lesson_note!.toList(qparams);
+  }
+
+  /// This method returns Primary Key List SQL and Parameters retVal = Map<String,dynamic>. [Staff_lesson_note]
+  /// retVal['sql'] = SQL statement string, retVal['args'] = whereArguments List<dynamic>;
+  /// <returns>List<String>
+  @override
+  Map<String, dynamic> toListPrimaryKeySQL([bool buildParams = true]) {
+    final Map<String, dynamic> _retVal = <String, dynamic>{};
+    if (buildParams) {
+      buildParameters();
+    }
+    _retVal['sql'] =
+        'SELECT `id` FROM staff_lesson_note WHERE ${qparams.whereString}';
+    _retVal['args'] = qparams.whereArguments;
+    return _retVal;
+  }
+
+  /// This method returns Primary Key List<int>.
+  /// <returns>List<int>
+  @override
+  Future<List<int>> toListPrimaryKey([bool buildParams = true]) async {
+    if (buildParams) {
+      buildParameters();
+    }
+    final List<int> idData = <int>[];
+    qparams.selectColumns = ['id'];
+    final idFuture = await _mnStaff_lesson_note!.toList(qparams);
+
+    final int count = idFuture.length;
+    for (int i = 0; i < count; i++) {
+      idData.add(idFuture[i]['id'] as int);
+    }
+    return idData;
+  }
+
+  /// Returns List<dynamic> for selected columns. Use this method for 'groupBy' with min,max,avg..  [Staff_lesson_note]
+  /// Sample usage: (see EXAMPLE 4.2 at https://github.com/hhtokpinar/sqfEntity#group-by)
+  @override
+  Future<List<dynamic>> toListObject() async {
+    buildParameters();
+
+    final objectFuture = _mnStaff_lesson_note!.toList(qparams);
+
+    final List<dynamic> objectsData = <dynamic>[];
+    final data = await objectFuture;
+    final int count = data.length;
+    for (int i = 0; i < count; i++) {
+      objectsData.add(data[i]);
+    }
+    return objectsData;
+  }
+
+  /// Returns List<String> for selected first column
+  /// Sample usage: await Staff_lesson_note.select(columnsToSelect: ['columnName']).toListString()
+  @override
+  Future<List<String>> toListString(
+      [VoidCallback Function(List<String> o)? listString]) async {
+    buildParameters();
+
+    final objectFuture = _mnStaff_lesson_note!.toList(qparams);
+
+    final List<String> objectsData = <String>[];
+    final data = await objectFuture;
+    final int count = data.length;
+    for (int i = 0; i < count; i++) {
+      objectsData.add(data[i][qparams.selectColumns![0]].toString());
+    }
+    if (listString != null) {
+      listString(objectsData);
+    }
+    return objectsData;
+  }
+}
+// endregion Staff_lesson_noteFilterBuilder
+
+// region Staff_lesson_noteFields
+class Staff_lesson_noteFields {
+  static TableField? _fId;
+  static TableField get id {
+    return _fId = _fId ?? SqlSyntax.setField(_fId, 'id', DbType.integer);
+  }
+
+  static TableField? _fStaffId;
+  static TableField get staffId {
+    return _fStaffId =
+        _fStaffId ?? SqlSyntax.setField(_fStaffId, 'staffId', DbType.integer);
+  }
+
+  static TableField? _fAcademic_year;
+  static TableField get academic_year {
+    return _fAcademic_year = _fAcademic_year ??
+        SqlSyntax.setField(_fAcademic_year, 'academic_year', DbType.text);
+  }
+
+  static TableField? _fTerm;
+  static TableField get term {
+    return _fTerm = _fTerm ?? SqlSyntax.setField(_fTerm, 'term', DbType.text);
+  }
+
+  static TableField? _fWeek_1;
+  static TableField get week_1 {
+    return _fWeek_1 =
+        _fWeek_1 ?? SqlSyntax.setField(_fWeek_1, 'week_1', DbType.bool);
+  }
+
+  static TableField? _fWeek_2;
+  static TableField get week_2 {
+    return _fWeek_2 =
+        _fWeek_2 ?? SqlSyntax.setField(_fWeek_2, 'week_2', DbType.bool);
+  }
+
+  static TableField? _fWeek_3;
+  static TableField get week_3 {
+    return _fWeek_3 =
+        _fWeek_3 ?? SqlSyntax.setField(_fWeek_3, 'week_3', DbType.bool);
+  }
+
+  static TableField? _fWeek_4;
+  static TableField get week_4 {
+    return _fWeek_4 =
+        _fWeek_4 ?? SqlSyntax.setField(_fWeek_4, 'week_4', DbType.bool);
+  }
+
+  static TableField? _fWeek_5;
+  static TableField get week_5 {
+    return _fWeek_5 =
+        _fWeek_5 ?? SqlSyntax.setField(_fWeek_5, 'week_5', DbType.bool);
+  }
+
+  static TableField? _fWeek_6;
+  static TableField get week_6 {
+    return _fWeek_6 =
+        _fWeek_6 ?? SqlSyntax.setField(_fWeek_6, 'week_6', DbType.bool);
+  }
+
+  static TableField? _fWeek_7;
+  static TableField get week_7 {
+    return _fWeek_7 =
+        _fWeek_7 ?? SqlSyntax.setField(_fWeek_7, 'week_7', DbType.bool);
+  }
+
+  static TableField? _fWeek_8;
+  static TableField get week_8 {
+    return _fWeek_8 =
+        _fWeek_8 ?? SqlSyntax.setField(_fWeek_8, 'week_8', DbType.bool);
+  }
+
+  static TableField? _fWeek_9;
+  static TableField get week_9 {
+    return _fWeek_9 =
+        _fWeek_9 ?? SqlSyntax.setField(_fWeek_9, 'week_9', DbType.bool);
+  }
+
+  static TableField? _fWeek_10;
+  static TableField get week_10 {
+    return _fWeek_10 =
+        _fWeek_10 ?? SqlSyntax.setField(_fWeek_10, 'week_10', DbType.bool);
+  }
+
+  static TableField? _fWeek_11;
+  static TableField get week_11 {
+    return _fWeek_11 =
+        _fWeek_11 ?? SqlSyntax.setField(_fWeek_11, 'week_11', DbType.bool);
+  }
+
+  static TableField? _fWeek_12;
+  static TableField get week_12 {
+    return _fWeek_12 =
+        _fWeek_12 ?? SqlSyntax.setField(_fWeek_12, 'week_12', DbType.bool);
+  }
+}
+// endregion Staff_lesson_noteFields
+
+//region Staff_lesson_noteManager
+class Staff_lesson_noteManager extends SqfEntityProvider {
+  Staff_lesson_noteManager()
+      : super(AttendanceDbModel(),
+            tableName: _tableName,
+            primaryKeyList: _primaryKeyList,
+            whereStr: _whereStr);
+  static const String _tableName = 'staff_lesson_note';
+  static const List<String> _primaryKeyList = ['id'];
+  static const String _whereStr = 'id=?';
+}
+
+//endregion Staff_lesson_noteManager
+// region Plc
+class Plc extends TableBase {
+  Plc(
+      {this.id,
+      this.staffId,
+      this.academic_year,
+      this.term,
+      this.week_1,
+      this.week_2,
+      this.week_3,
+      this.week_4,
+      this.week_5,
+      this.week_6,
+      this.week_7,
+      this.week_8,
+      this.week_9,
+      this.week_10,
+      this.week_11,
+      this.week_12}) {
+    _setDefaultValues();
+    softDeleteActivated = false;
+  }
+  Plc.withFields(
+      this.staffId,
+      this.academic_year,
+      this.term,
+      this.week_1,
+      this.week_2,
+      this.week_3,
+      this.week_4,
+      this.week_5,
+      this.week_6,
+      this.week_7,
+      this.week_8,
+      this.week_9,
+      this.week_10,
+      this.week_11,
+      this.week_12) {
+    _setDefaultValues();
+  }
+  Plc.withId(
+      this.id,
+      this.staffId,
+      this.academic_year,
+      this.term,
+      this.week_1,
+      this.week_2,
+      this.week_3,
+      this.week_4,
+      this.week_5,
+      this.week_6,
+      this.week_7,
+      this.week_8,
+      this.week_9,
+      this.week_10,
+      this.week_11,
+      this.week_12) {
+    _setDefaultValues();
+  }
+  // fromMap v2.0
+  Plc.fromMap(Map<String, dynamic> o, {bool setDefaultValues = true}) {
+    if (setDefaultValues) {
+      _setDefaultValues();
+    }
+    id = int.tryParse(o['id'].toString());
+    staffId = int.tryParse(o['staffId'].toString());
+
+    if (o['academic_year'] != null) {
+      academic_year = o['academic_year'].toString();
+    }
+    if (o['term'] != null) {
+      term = o['term'].toString();
+    }
+    if (o['week_1'] != null) {
+      week_1 =
+          o['week_1'].toString() == '1' || o['week_1'].toString() == 'true';
+    }
+    if (o['week_2'] != null) {
+      week_2 =
+          o['week_2'].toString() == '1' || o['week_2'].toString() == 'true';
+    }
+    if (o['week_3'] != null) {
+      week_3 =
+          o['week_3'].toString() == '1' || o['week_3'].toString() == 'true';
+    }
+    if (o['week_4'] != null) {
+      week_4 =
+          o['week_4'].toString() == '1' || o['week_4'].toString() == 'true';
+    }
+    if (o['week_5'] != null) {
+      week_5 =
+          o['week_5'].toString() == '1' || o['week_5'].toString() == 'true';
+    }
+    if (o['week_6'] != null) {
+      week_6 =
+          o['week_6'].toString() == '1' || o['week_6'].toString() == 'true';
+    }
+    if (o['week_7'] != null) {
+      week_7 =
+          o['week_7'].toString() == '1' || o['week_7'].toString() == 'true';
+    }
+    if (o['week_8'] != null) {
+      week_8 =
+          o['week_8'].toString() == '1' || o['week_8'].toString() == 'true';
+    }
+    if (o['week_9'] != null) {
+      week_9 =
+          o['week_9'].toString() == '1' || o['week_9'].toString() == 'true';
+    }
+    if (o['week_10'] != null) {
+      week_10 =
+          o['week_10'].toString() == '1' || o['week_10'].toString() == 'true';
+    }
+    if (o['week_11'] != null) {
+      week_11 =
+          o['week_11'].toString() == '1' || o['week_11'].toString() == 'true';
+    }
+    if (o['week_12'] != null) {
+      week_12 =
+          o['week_12'].toString() == '1' || o['week_12'].toString() == 'true';
+    }
+
+    // RELATIONSHIPS FromMAP
+    plStaff = o['staff'] != null
+        ? Staff.fromMap(o['staff'] as Map<String, dynamic>)
+        : null;
+    // END RELATIONSHIPS FromMAP
+  }
+  // FIELDS (Plc)
+  int? id;
+  int? staffId;
+  String? academic_year;
+  String? term;
+  bool? week_1;
+  bool? week_2;
+  bool? week_3;
+  bool? week_4;
+  bool? week_5;
+  bool? week_6;
+  bool? week_7;
+  bool? week_8;
+  bool? week_9;
+  bool? week_10;
+  bool? week_11;
+  bool? week_12;
+
+  // end FIELDS (Plc)
+
+// RELATIONSHIPS (Plc)
+  /// to load parent of items to this field, use preload parameter ex: toList(preload:true) or toSingle(preload:true) or getById(preload:true)
+  /// You can also specify this object into certain preload fields!. Ex: toList(preload:true, preloadFields:['plStaff', 'plField2'..]) or so on..
+  Staff? plStaff;
+
+  /// get Staff By StaffId
+  Future<Staff?> getStaff(
+      {bool loadParents = false, List<String>? loadedFields}) async {
+    final _obj = await Staff()
+        .getById(staffId, loadParents: loadParents, loadedFields: loadedFields);
+    return _obj;
+  }
+  // END RELATIONSHIPS (Plc)
+
+  static const bool _softDeleteActivated = false;
+  PlcManager? __mnPlc;
+
+  PlcManager get _mnPlc {
+    return __mnPlc = __mnPlc ?? PlcManager();
+  }
+
+  // METHODS
+  @override
+  Map<String, dynamic> toMap(
+      {bool forQuery = false, bool forJson = false, bool forView = false}) {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    if (staffId != null) {
+      map['staffId'] = forView
+          ? plStaff == null
+              ? staffId
+              : plStaff!.first_name
+          : staffId;
+    } else if (staffId != null || !forView) {
+      map['staffId'] = null;
+    }
+    if (academic_year != null || !forView) {
+      map['academic_year'] = academic_year;
+    }
+    if (term != null || !forView) {
+      map['term'] = term;
+    }
+    if (week_1 != null) {
+      map['week_1'] = forQuery ? (week_1! ? 1 : 0) : week_1;
+    } else if (week_1 != null || !forView) {
+      map['week_1'] = null;
+    }
+    if (week_2 != null) {
+      map['week_2'] = forQuery ? (week_2! ? 1 : 0) : week_2;
+    } else if (week_2 != null || !forView) {
+      map['week_2'] = null;
+    }
+    if (week_3 != null) {
+      map['week_3'] = forQuery ? (week_3! ? 1 : 0) : week_3;
+    } else if (week_3 != null || !forView) {
+      map['week_3'] = null;
+    }
+    if (week_4 != null) {
+      map['week_4'] = forQuery ? (week_4! ? 1 : 0) : week_4;
+    } else if (week_4 != null || !forView) {
+      map['week_4'] = null;
+    }
+    if (week_5 != null) {
+      map['week_5'] = forQuery ? (week_5! ? 1 : 0) : week_5;
+    } else if (week_5 != null || !forView) {
+      map['week_5'] = null;
+    }
+    if (week_6 != null) {
+      map['week_6'] = forQuery ? (week_6! ? 1 : 0) : week_6;
+    } else if (week_6 != null || !forView) {
+      map['week_6'] = null;
+    }
+    if (week_7 != null) {
+      map['week_7'] = forQuery ? (week_7! ? 1 : 0) : week_7;
+    } else if (week_7 != null || !forView) {
+      map['week_7'] = null;
+    }
+    if (week_8 != null) {
+      map['week_8'] = forQuery ? (week_8! ? 1 : 0) : week_8;
+    } else if (week_8 != null || !forView) {
+      map['week_8'] = null;
+    }
+    if (week_9 != null) {
+      map['week_9'] = forQuery ? (week_9! ? 1 : 0) : week_9;
+    } else if (week_9 != null || !forView) {
+      map['week_9'] = null;
+    }
+    if (week_10 != null) {
+      map['week_10'] = forQuery ? (week_10! ? 1 : 0) : week_10;
+    } else if (week_10 != null || !forView) {
+      map['week_10'] = null;
+    }
+    if (week_11 != null) {
+      map['week_11'] = forQuery ? (week_11! ? 1 : 0) : week_11;
+    } else if (week_11 != null || !forView) {
+      map['week_11'] = null;
+    }
+    if (week_12 != null) {
+      map['week_12'] = forQuery ? (week_12! ? 1 : 0) : week_12;
+    } else if (week_12 != null || !forView) {
+      map['week_12'] = null;
+    }
+
+    return map;
+  }
+
+  @override
+  Future<Map<String, dynamic>> toMapWithChildren(
+      [bool forQuery = false,
+      bool forJson = false,
+      bool forView = false]) async {
+    final map = <String, dynamic>{};
+    map['id'] = id;
+    if (staffId != null) {
+      map['staffId'] = forView
+          ? plStaff == null
+              ? staffId
+              : plStaff!.first_name
+          : staffId;
+    } else if (staffId != null || !forView) {
+      map['staffId'] = null;
+    }
+    if (academic_year != null || !forView) {
+      map['academic_year'] = academic_year;
+    }
+    if (term != null || !forView) {
+      map['term'] = term;
+    }
+    if (week_1 != null) {
+      map['week_1'] = forQuery ? (week_1! ? 1 : 0) : week_1;
+    } else if (week_1 != null || !forView) {
+      map['week_1'] = null;
+    }
+    if (week_2 != null) {
+      map['week_2'] = forQuery ? (week_2! ? 1 : 0) : week_2;
+    } else if (week_2 != null || !forView) {
+      map['week_2'] = null;
+    }
+    if (week_3 != null) {
+      map['week_3'] = forQuery ? (week_3! ? 1 : 0) : week_3;
+    } else if (week_3 != null || !forView) {
+      map['week_3'] = null;
+    }
+    if (week_4 != null) {
+      map['week_4'] = forQuery ? (week_4! ? 1 : 0) : week_4;
+    } else if (week_4 != null || !forView) {
+      map['week_4'] = null;
+    }
+    if (week_5 != null) {
+      map['week_5'] = forQuery ? (week_5! ? 1 : 0) : week_5;
+    } else if (week_5 != null || !forView) {
+      map['week_5'] = null;
+    }
+    if (week_6 != null) {
+      map['week_6'] = forQuery ? (week_6! ? 1 : 0) : week_6;
+    } else if (week_6 != null || !forView) {
+      map['week_6'] = null;
+    }
+    if (week_7 != null) {
+      map['week_7'] = forQuery ? (week_7! ? 1 : 0) : week_7;
+    } else if (week_7 != null || !forView) {
+      map['week_7'] = null;
+    }
+    if (week_8 != null) {
+      map['week_8'] = forQuery ? (week_8! ? 1 : 0) : week_8;
+    } else if (week_8 != null || !forView) {
+      map['week_8'] = null;
+    }
+    if (week_9 != null) {
+      map['week_9'] = forQuery ? (week_9! ? 1 : 0) : week_9;
+    } else if (week_9 != null || !forView) {
+      map['week_9'] = null;
+    }
+    if (week_10 != null) {
+      map['week_10'] = forQuery ? (week_10! ? 1 : 0) : week_10;
+    } else if (week_10 != null || !forView) {
+      map['week_10'] = null;
+    }
+    if (week_11 != null) {
+      map['week_11'] = forQuery ? (week_11! ? 1 : 0) : week_11;
+    } else if (week_11 != null || !forView) {
+      map['week_11'] = null;
+    }
+    if (week_12 != null) {
+      map['week_12'] = forQuery ? (week_12! ? 1 : 0) : week_12;
+    } else if (week_12 != null || !forView) {
+      map['week_12'] = null;
+    }
+
+    return map;
+  }
+
+  /// This method returns Json String [Plc]
+  @override
+  String toJson() {
+    return json.encode(toMap(forJson: true));
+  }
+
+  /// This method returns Json String [Plc]
+  @override
+  Future<String> toJsonWithChilds() async {
+    return json.encode(await toMapWithChildren(false, true));
+  }
+
+  @override
+  List<dynamic> toArgs() {
+    return [
+      staffId,
+      academic_year,
+      term,
+      week_1,
+      week_2,
+      week_3,
+      week_4,
+      week_5,
+      week_6,
+      week_7,
+      week_8,
+      week_9,
+      week_10,
+      week_11,
+      week_12
+    ];
+  }
+
+  @override
+  List<dynamic> toArgsWithIds() {
+    return [
+      id,
+      staffId,
+      academic_year,
+      term,
+      week_1,
+      week_2,
+      week_3,
+      week_4,
+      week_5,
+      week_6,
+      week_7,
+      week_8,
+      week_9,
+      week_10,
+      week_11,
+      week_12
+    ];
+  }
+
+  static Future<List<Plc>?> fromWebUrl(Uri uri,
+      {Map<String, String>? headers}) async {
+    try {
+      final response = await http.get(uri, headers: headers);
+      return await fromJson(response.body);
+    } catch (e) {
+      debugPrint(
+          'SQFENTITY ERROR Plc.fromWebUrl: ErrorMessage: ${e.toString()}');
+      return null;
+    }
+  }
+
+  Future<http.Response> postUrl(Uri uri, {Map<String, String>? headers}) {
+    return http.post(uri, headers: headers, body: toJson());
+  }
+
+  static Future<List<Plc>> fromJson(String jsonBody) async {
+    final Iterable list = await json.decode(jsonBody) as Iterable;
+    var objList = <Plc>[];
+    try {
+      objList =
+          list.map((plc) => Plc.fromMap(plc as Map<String, dynamic>)).toList();
+    } catch (e) {
+      debugPrint('SQFENTITY ERROR Plc.fromJson: ErrorMessage: ${e.toString()}');
+    }
+    return objList;
+  }
+
+  static Future<List<Plc>> fromMapList(List<dynamic> data,
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields,
+      bool setDefaultValues = true}) async {
+    final List<Plc> objList = <Plc>[];
+    loadedFields = loadedFields ?? [];
+    for (final map in data) {
+      final obj = Plc.fromMap(map as Map<String, dynamic>,
+          setDefaultValues: setDefaultValues);
+      // final List<String> _loadedFields = List<String>.from(loadedFields);
+
+      // RELATIONSHIPS PRELOAD
+      if (preload || loadParents) {
+        loadedFields = loadedFields ?? [];
+        if ((preloadFields == null ||
+            loadParents ||
+            preloadFields.contains('plStaff'))) {
+          obj.plStaff =
+              obj.plStaff ?? await obj.getStaff(loadParents: loadParents);
+        }
+      } // END RELATIONSHIPS PRELOAD
+
+      objList.add(obj);
+    }
+    return objList;
+  }
+
+  /// returns Plc by ID if exist, otherwise returns null
+  /// Primary Keys: int? id
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: getById(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: getById(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns>returns [Plc] if exist, otherwise returns null
+  Future<Plc?> getById(int? id,
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    if (id == null) {
+      return null;
+    }
+    Plc? obj;
+    final data = await _mnPlc.getById([id]);
+    if (data.length != 0) {
+      obj = Plc.fromMap(data[0] as Map<String, dynamic>);
+
+      // RELATIONSHIPS PRELOAD
+      if (preload || loadParents) {
+        loadedFields = loadedFields ?? [];
+        if ((preloadFields == null ||
+            loadParents ||
+            preloadFields.contains('plStaff'))) {
+          obj.plStaff =
+              obj.plStaff ?? await obj.getStaff(loadParents: loadParents);
+        }
+      } // END RELATIONSHIPS PRELOAD
+    } else {
+      obj = null;
+    }
+    return obj;
+  }
+
+  /// Saves the (Plc) object. If the id field is null, saves as a new record and returns new id, if id is not null then updates record
+  /// ignoreBatch = true as a default. Set ignoreBatch to false if you run more than one save() operation those are between batchStart and batchCommit
+  /// <returns>Returns id
+  @override
+  Future<int?> save({bool ignoreBatch = true}) async {
+    if (id == null || id == 0) {
+      id = await _mnPlc.insert(this, ignoreBatch);
+    } else {
+      await _mnPlc.update(this);
+    }
+
+    return id;
+  }
+
+  /// Saves the (Plc) object. If the id field is null, saves as a new record and returns new id, if id is not null then updates record
+  /// ignoreBatch = true as a default. Set ignoreBatch to false if you run more than one save() operation those are between batchStart and batchCommit
+  /// <returns>Returns id
+  @override
+  Future<int?> saveOrThrow({bool ignoreBatch = true}) async {
+    if (id == null || id == 0) {
+      id = await _mnPlc.insertOrThrow(this, ignoreBatch);
+
+      isInsert = true;
+    } else {
+      // id= await _upsert(); // removed in sqfentity_gen 1.3.0+6
+      await _mnPlc.updateOrThrow(this);
+    }
+
+    return id;
+  }
+
+  /// saveAs Plc. Returns a new Primary Key value of Plc
+
+  /// <returns>Returns a new Primary Key value of Plc
+  @override
+  Future<int?> saveAs({bool ignoreBatch = true}) async {
+    id = null;
+
+    return save(ignoreBatch: ignoreBatch);
+  }
+
+  /// saveAll method saves the sent List<Plc> as a bulk in one transaction
+  /// Returns a <List<BoolResult>>
+  static Future<List<dynamic>> saveAll(List<Plc> plcs,
+      {bool? exclusive, bool? noResult, bool? continueOnError}) async {
+    List<dynamic>? result = [];
+    // If there is no open transaction, start one
+    final isStartedBatch = await AttendanceDbModel().batchStart();
+    for (final obj in plcs) {
+      await obj.save(ignoreBatch: false);
+    }
+    if (!isStartedBatch) {
+      result = await AttendanceDbModel().batchCommit(
+          exclusive: exclusive,
+          noResult: noResult,
+          continueOnError: continueOnError);
+      for (int i = 0; i < plcs.length; i++) {
+        if (plcs[i].id == null) {
+          plcs[i].id = result![i] as int;
+        }
+      }
+    }
+    return result!;
+  }
+
+  /// Updates if the record exists, otherwise adds a new row
+  /// <returns>Returns id
+  @override
+  Future<int?> upsert({bool ignoreBatch = true}) async {
+    try {
+      final result = await _mnPlc.rawInsert(
+          'INSERT OR REPLACE INTO plc (id, staffId, academic_year, term, week_1, week_2, week_3, week_4, week_5, week_6, week_7, week_8, week_9, week_10, week_11, week_12)  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+          [
+            id,
+            staffId,
+            academic_year,
+            term,
+            week_1,
+            week_2,
+            week_3,
+            week_4,
+            week_5,
+            week_6,
+            week_7,
+            week_8,
+            week_9,
+            week_10,
+            week_11,
+            week_12
+          ],
+          ignoreBatch);
+      if (result! > 0) {
+        saveResult = BoolResult(
+            success: true, successMessage: 'Plc id=$id updated successfully');
+      } else {
+        saveResult = BoolResult(
+            success: false, errorMessage: 'Plc id=$id did not update');
+      }
+      return id;
+    } catch (e) {
+      saveResult = BoolResult(
+          success: false,
+          errorMessage: 'Plc Save failed. Error: ${e.toString()}');
+      return null;
+    }
+  }
+
+  /// inserts or replaces the sent List<<Plc>> as a bulk in one transaction.
+  /// upsertAll() method is faster then saveAll() method. upsertAll() should be used when you are sure that the primary key is greater than zero
+  /// Returns a BoolCommitResult
+  @override
+  Future<BoolCommitResult> upsertAll(List<Plc> plcs,
+      {bool? exclusive, bool? noResult, bool? continueOnError}) async {
+    final results = await _mnPlc.rawInsertAll(
+        'INSERT OR REPLACE INTO plc (id, staffId, academic_year, term, week_1, week_2, week_3, week_4, week_5, week_6, week_7, week_8, week_9, week_10, week_11, week_12)  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        plcs,
+        exclusive: exclusive,
+        noResult: noResult,
+        continueOnError: continueOnError);
+    return results;
+  }
+
+  /// Deletes Plc
+
+  /// <returns>BoolResult res.success= true (Deleted), false (Could not be deleted)
+  @override
+  Future<BoolResult> delete([bool hardDelete = false]) async {
+    debugPrint('SQFENTITIY: delete Plc invoked (id=$id)');
+    if (!_softDeleteActivated || hardDelete) {
+      return _mnPlc
+          .delete(QueryParams(whereString: 'id=?', whereArguments: [id]));
+    } else {
+      return _mnPlc.updateBatch(
+          QueryParams(whereString: 'id=?', whereArguments: [id]),
+          {'isDeleted': 1});
+    }
+  }
+
+  @override
+  Future<BoolResult> recover([bool recoverChilds = true]) {
+    // not implemented because:
+    final msg =
+        'set useSoftDeleting:true in the table definition of [Plc] to use this feature';
+    throw UnimplementedError(msg);
+  }
+
+  @override
+  PlcFilterBuilder select({List<String>? columnsToSelect, bool? getIsDeleted}) {
+    return PlcFilterBuilder(this, getIsDeleted)
+      ..qparams.selectColumns = columnsToSelect;
+  }
+
+  @override
+  PlcFilterBuilder distinct(
+      {List<String>? columnsToSelect, bool? getIsDeleted}) {
+    return PlcFilterBuilder(this, getIsDeleted)
+      ..qparams.selectColumns = columnsToSelect
+      ..qparams.distinct = true;
+  }
+
+  void _setDefaultValues() {
+    staffId = staffId ?? 0;
+  }
+
+  @override
+  void rollbackPk() {
+    if (isInsert == true) {
+      id = null;
+    }
+  }
+
+  // END METHODS
+  // BEGIN CUSTOM CODE
+  /*
+      you can define customCode property of your SqfEntityTable constant. For example:
+      const tablePerson = SqfEntityTable(
+      tableName: 'person',
+      primaryKeyName: 'id',
+      primaryKeyType: PrimaryKeyType.integer_auto_incremental,
+      fields: [
+        SqfEntityField('firstName', DbType.text),
+        SqfEntityField('lastName', DbType.text),
+      ],
+      customCode: '''
+       String fullName()
+       { 
+         return '$firstName $lastName';
+       }
+      ''');
+     */
+  // END CUSTOM CODE
+}
+// endregion plc
+
+// region PlcField
+class PlcField extends FilterBase {
+  PlcField(PlcFilterBuilder plcFB) : super(plcFB);
+
+  @override
+  PlcFilterBuilder equals(dynamic pValue) {
+    return super.equals(pValue) as PlcFilterBuilder;
+  }
+
+  @override
+  PlcFilterBuilder equalsOrNull(dynamic pValue) {
+    return super.equalsOrNull(pValue) as PlcFilterBuilder;
+  }
+
+  @override
+  PlcFilterBuilder isNull() {
+    return super.isNull() as PlcFilterBuilder;
+  }
+
+  @override
+  PlcFilterBuilder contains(dynamic pValue) {
+    return super.contains(pValue) as PlcFilterBuilder;
+  }
+
+  @override
+  PlcFilterBuilder startsWith(dynamic pValue) {
+    return super.startsWith(pValue) as PlcFilterBuilder;
+  }
+
+  @override
+  PlcFilterBuilder endsWith(dynamic pValue) {
+    return super.endsWith(pValue) as PlcFilterBuilder;
+  }
+
+  @override
+  PlcFilterBuilder between(dynamic pFirst, dynamic pLast) {
+    return super.between(pFirst, pLast) as PlcFilterBuilder;
+  }
+
+  @override
+  PlcFilterBuilder greaterThan(dynamic pValue) {
+    return super.greaterThan(pValue) as PlcFilterBuilder;
+  }
+
+  @override
+  PlcFilterBuilder lessThan(dynamic pValue) {
+    return super.lessThan(pValue) as PlcFilterBuilder;
+  }
+
+  @override
+  PlcFilterBuilder greaterThanOrEquals(dynamic pValue) {
+    return super.greaterThanOrEquals(pValue) as PlcFilterBuilder;
+  }
+
+  @override
+  PlcFilterBuilder lessThanOrEquals(dynamic pValue) {
+    return super.lessThanOrEquals(pValue) as PlcFilterBuilder;
+  }
+
+  @override
+  PlcFilterBuilder inValues(dynamic pValue) {
+    return super.inValues(pValue) as PlcFilterBuilder;
+  }
+
+  @override
+  PlcField get not {
+    return super.not as PlcField;
+  }
+}
+// endregion PlcField
+
+// region PlcFilterBuilder
+class PlcFilterBuilder extends ConjunctionBase {
+  PlcFilterBuilder(Plc obj, bool? getIsDeleted) : super(obj, getIsDeleted) {
+    _mnPlc = obj._mnPlc;
+    _softDeleteActivated = obj.softDeleteActivated;
+  }
+
+  bool _softDeleteActivated = false;
+  PlcManager? _mnPlc;
+
+  /// put the sql keyword 'AND'
+  @override
+  PlcFilterBuilder get and {
+    super.and;
+    return this;
+  }
+
+  /// put the sql keyword 'OR'
+  @override
+  PlcFilterBuilder get or {
+    super.or;
+    return this;
+  }
+
+  /// open parentheses
+  @override
+  PlcFilterBuilder get startBlock {
+    super.startBlock;
+    return this;
+  }
+
+  /// String whereCriteria, write raw query without 'where' keyword. Like this: 'field1 like 'test%' and field2 = 3'
+  @override
+  PlcFilterBuilder where(String? whereCriteria, {dynamic parameterValue}) {
+    super.where(whereCriteria, parameterValue: parameterValue);
+    return this;
+  }
+
+  /// page = page number,
+  /// pagesize = row(s) per page
+  @override
+  PlcFilterBuilder page(int page, int pagesize) {
+    super.page(page, pagesize);
+    return this;
+  }
+
+  /// int count = LIMIT
+  @override
+  PlcFilterBuilder top(int count) {
+    super.top(count);
+    return this;
+  }
+
+  /// close parentheses
+  @override
+  PlcFilterBuilder get endBlock {
+    super.endBlock;
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='name, date'
+  /// Example 2: argFields = ['name', 'date']
+  @override
+  PlcFilterBuilder orderBy(dynamic argFields) {
+    super.orderBy(argFields);
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='field1, field2'
+  /// Example 2: argFields = ['field1', 'field2']
+  @override
+  PlcFilterBuilder orderByDesc(dynamic argFields) {
+    super.orderByDesc(argFields);
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='field1, field2'
+  /// Example 2: argFields = ['field1', 'field2']
+  @override
+  PlcFilterBuilder groupBy(dynamic argFields) {
+    super.groupBy(argFields);
+    return this;
+  }
+
+  /// argFields might be String or List<String>.
+  /// Example 1: argFields='name, date'
+  /// Example 2: argFields = ['name', 'date']
+  @override
+  PlcFilterBuilder having(dynamic argFields) {
+    super.having(argFields);
+    return this;
+  }
+
+  PlcField _setField(PlcField? field, String colName, DbType dbtype) {
+    return PlcField(this)
+      ..param = DbParameter(
+          dbType: dbtype, columnName: colName, wStartBlock: openedBlock);
+  }
+
+  PlcField? _id;
+  PlcField get id {
+    return _id = _setField(_id, 'id', DbType.integer);
+  }
+
+  PlcField? _staffId;
+  PlcField get staffId {
+    return _staffId = _setField(_staffId, 'staffId', DbType.integer);
+  }
+
+  PlcField? _academic_year;
+  PlcField get academic_year {
+    return _academic_year =
+        _setField(_academic_year, 'academic_year', DbType.text);
+  }
+
+  PlcField? _term;
+  PlcField get term {
+    return _term = _setField(_term, 'term', DbType.text);
+  }
+
+  PlcField? _week_1;
+  PlcField get week_1 {
+    return _week_1 = _setField(_week_1, 'week_1', DbType.bool);
+  }
+
+  PlcField? _week_2;
+  PlcField get week_2 {
+    return _week_2 = _setField(_week_2, 'week_2', DbType.bool);
+  }
+
+  PlcField? _week_3;
+  PlcField get week_3 {
+    return _week_3 = _setField(_week_3, 'week_3', DbType.bool);
+  }
+
+  PlcField? _week_4;
+  PlcField get week_4 {
+    return _week_4 = _setField(_week_4, 'week_4', DbType.bool);
+  }
+
+  PlcField? _week_5;
+  PlcField get week_5 {
+    return _week_5 = _setField(_week_5, 'week_5', DbType.bool);
+  }
+
+  PlcField? _week_6;
+  PlcField get week_6 {
+    return _week_6 = _setField(_week_6, 'week_6', DbType.bool);
+  }
+
+  PlcField? _week_7;
+  PlcField get week_7 {
+    return _week_7 = _setField(_week_7, 'week_7', DbType.bool);
+  }
+
+  PlcField? _week_8;
+  PlcField get week_8 {
+    return _week_8 = _setField(_week_8, 'week_8', DbType.bool);
+  }
+
+  PlcField? _week_9;
+  PlcField get week_9 {
+    return _week_9 = _setField(_week_9, 'week_9', DbType.bool);
+  }
+
+  PlcField? _week_10;
+  PlcField get week_10 {
+    return _week_10 = _setField(_week_10, 'week_10', DbType.bool);
+  }
+
+  PlcField? _week_11;
+  PlcField get week_11 {
+    return _week_11 = _setField(_week_11, 'week_11', DbType.bool);
+  }
+
+  PlcField? _week_12;
+  PlcField get week_12 {
+    return _week_12 = _setField(_week_12, 'week_12', DbType.bool);
+  }
+
+  /// Deletes List<Plc> bulk by query
+  ///
+  /// <returns>BoolResult res.success= true (Deleted), false (Could not be deleted)
+  @override
+  Future<BoolResult> delete([bool hardDelete = false]) async {
+    buildParameters();
+    var r = BoolResult(success: false);
+
+    if (_softDeleteActivated && !hardDelete) {
+      r = await _mnPlc!.updateBatch(qparams, {'isDeleted': 1});
+    } else {
+      r = await _mnPlc!.delete(qparams);
+    }
+    return r;
+  }
+
+  /// using:
+  /// update({'fieldName': Value})
+  /// fieldName must be String. Value is dynamic, it can be any of the (int, bool, String.. )
+  @override
+  Future<BoolResult> update(Map<String, dynamic> values) {
+    buildParameters();
+    if (qparams.limit! > 0 || qparams.offset! > 0) {
+      qparams.whereString =
+          'id IN (SELECT id from plc ${qparams.whereString!.isNotEmpty ? 'WHERE ${qparams.whereString}' : ''}${qparams.limit! > 0 ? ' LIMIT ${qparams.limit}' : ''}${qparams.offset! > 0 ? ' OFFSET ${qparams.offset}' : ''})';
+    }
+    return _mnPlc!.updateBatch(qparams, values);
+  }
+
+  /// This method always returns [Plc] Obj if exist, otherwise returns null
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: toSingle(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: toSingle(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns> Plc?
+  @override
+  Future<Plc?> toSingle(
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    buildParameters(pSize: 1);
+    final objFuture = _mnPlc!.toList(qparams);
+    final data = await objFuture;
+    Plc? obj;
+    if (data.isNotEmpty) {
+      obj = Plc.fromMap(data[0] as Map<String, dynamic>);
+
+      // RELATIONSHIPS PRELOAD
+      if (preload || loadParents) {
+        loadedFields = loadedFields ?? [];
+        if ((preloadFields == null ||
+            loadParents ||
+            preloadFields.contains('plStaff'))) {
+          obj.plStaff =
+              obj.plStaff ?? await obj.getStaff(loadParents: loadParents);
+        }
+      } // END RELATIONSHIPS PRELOAD
+    } else {
+      obj = null;
+    }
+    return obj;
+  }
+
+  /// This method always returns [Plc]
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: toSingle(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: toSingle(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns> Plc?
+  @override
+  Future<Plc> toSingleOrDefault(
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    return await toSingle(
+            preload: preload,
+            preloadFields: preloadFields,
+            loadParents: loadParents,
+            loadedFields: loadedFields) ??
+        Plc();
+  }
+
+  /// This method returns int. [Plc]
+  /// <returns>int
+  @override
+  Future<int> toCount([VoidCallback Function(int c)? plcCount]) async {
+    buildParameters();
+    qparams.selectColumns = ['COUNT(1) AS CNT'];
+    final plcsFuture = await _mnPlc!.toList(qparams);
+    final int count = plcsFuture[0]['CNT'] as int;
+    if (plcCount != null) {
+      plcCount(count);
+    }
+    return count;
+  }
+
+  /// This method returns List<Plc> [Plc]
+  /// bool preload: if true, loads all related child objects (Set preload to true if you want to load all fields related to child or parent)
+  /// ex: toList(preload:true) -> Loads all related objects
+  /// List<String> preloadFields: specify the fields you want to preload (preload parameter's value should also be "true")
+  /// ex: toList(preload:true, preloadFields:['plField1','plField2'... etc])  -> Loads only certain fields what you specified
+  /// bool loadParents: if true, loads all parent objects until the object has no parent
+
+  /// <returns>List<Plc>
+  @override
+  Future<List<Plc>> toList(
+      {bool preload = false,
+      List<String>? preloadFields,
+      bool loadParents = false,
+      List<String>? loadedFields}) async {
+    final data = await toMapList();
+    final List<Plc> plcsData = await Plc.fromMapList(data,
+        preload: preload,
+        preloadFields: preloadFields,
+        loadParents: loadParents,
+        loadedFields: loadedFields,
+        setDefaultValues: qparams.selectColumns == null);
+    return plcsData;
+  }
+
+  /// This method returns Json String [Plc]
+  @override
+  Future<String> toJson() async {
+    final list = <dynamic>[];
+    final data = await toList();
+    for (var o in data) {
+      list.add(o.toMap(forJson: true));
+    }
+    return json.encode(list);
+  }
+
+  /// This method returns Json String. [Plc]
+  @override
+  Future<String> toJsonWithChilds() async {
+    final list = <dynamic>[];
+    final data = await toList();
+    for (var o in data) {
+      list.add(await o.toMapWithChildren(false, true));
+    }
+    return json.encode(list);
+  }
+
+  /// This method returns List<dynamic>. [Plc]
+  /// <returns>List<dynamic>
+  @override
+  Future<List<dynamic>> toMapList() async {
+    buildParameters();
+    return await _mnPlc!.toList(qparams);
+  }
+
+  /// This method returns Primary Key List SQL and Parameters retVal = Map<String,dynamic>. [Plc]
+  /// retVal['sql'] = SQL statement string, retVal['args'] = whereArguments List<dynamic>;
+  /// <returns>List<String>
+  @override
+  Map<String, dynamic> toListPrimaryKeySQL([bool buildParams = true]) {
+    final Map<String, dynamic> _retVal = <String, dynamic>{};
+    if (buildParams) {
+      buildParameters();
+    }
+    _retVal['sql'] = 'SELECT `id` FROM plc WHERE ${qparams.whereString}';
+    _retVal['args'] = qparams.whereArguments;
+    return _retVal;
+  }
+
+  /// This method returns Primary Key List<int>.
+  /// <returns>List<int>
+  @override
+  Future<List<int>> toListPrimaryKey([bool buildParams = true]) async {
+    if (buildParams) {
+      buildParameters();
+    }
+    final List<int> idData = <int>[];
+    qparams.selectColumns = ['id'];
+    final idFuture = await _mnPlc!.toList(qparams);
+
+    final int count = idFuture.length;
+    for (int i = 0; i < count; i++) {
+      idData.add(idFuture[i]['id'] as int);
+    }
+    return idData;
+  }
+
+  /// Returns List<dynamic> for selected columns. Use this method for 'groupBy' with min,max,avg..  [Plc]
+  /// Sample usage: (see EXAMPLE 4.2 at https://github.com/hhtokpinar/sqfEntity#group-by)
+  @override
+  Future<List<dynamic>> toListObject() async {
+    buildParameters();
+
+    final objectFuture = _mnPlc!.toList(qparams);
+
+    final List<dynamic> objectsData = <dynamic>[];
+    final data = await objectFuture;
+    final int count = data.length;
+    for (int i = 0; i < count; i++) {
+      objectsData.add(data[i]);
+    }
+    return objectsData;
+  }
+
+  /// Returns List<String> for selected first column
+  /// Sample usage: await Plc.select(columnsToSelect: ['columnName']).toListString()
+  @override
+  Future<List<String>> toListString(
+      [VoidCallback Function(List<String> o)? listString]) async {
+    buildParameters();
+
+    final objectFuture = _mnPlc!.toList(qparams);
+
+    final List<String> objectsData = <String>[];
+    final data = await objectFuture;
+    final int count = data.length;
+    for (int i = 0; i < count; i++) {
+      objectsData.add(data[i][qparams.selectColumns![0]].toString());
+    }
+    if (listString != null) {
+      listString(objectsData);
+    }
+    return objectsData;
+  }
+}
+// endregion PlcFilterBuilder
+
+// region PlcFields
+class PlcFields {
+  static TableField? _fId;
+  static TableField get id {
+    return _fId = _fId ?? SqlSyntax.setField(_fId, 'id', DbType.integer);
+  }
+
+  static TableField? _fStaffId;
+  static TableField get staffId {
+    return _fStaffId =
+        _fStaffId ?? SqlSyntax.setField(_fStaffId, 'staffId', DbType.integer);
+  }
+
+  static TableField? _fAcademic_year;
+  static TableField get academic_year {
+    return _fAcademic_year = _fAcademic_year ??
+        SqlSyntax.setField(_fAcademic_year, 'academic_year', DbType.text);
+  }
+
+  static TableField? _fTerm;
+  static TableField get term {
+    return _fTerm = _fTerm ?? SqlSyntax.setField(_fTerm, 'term', DbType.text);
+  }
+
+  static TableField? _fWeek_1;
+  static TableField get week_1 {
+    return _fWeek_1 =
+        _fWeek_1 ?? SqlSyntax.setField(_fWeek_1, 'week_1', DbType.bool);
+  }
+
+  static TableField? _fWeek_2;
+  static TableField get week_2 {
+    return _fWeek_2 =
+        _fWeek_2 ?? SqlSyntax.setField(_fWeek_2, 'week_2', DbType.bool);
+  }
+
+  static TableField? _fWeek_3;
+  static TableField get week_3 {
+    return _fWeek_3 =
+        _fWeek_3 ?? SqlSyntax.setField(_fWeek_3, 'week_3', DbType.bool);
+  }
+
+  static TableField? _fWeek_4;
+  static TableField get week_4 {
+    return _fWeek_4 =
+        _fWeek_4 ?? SqlSyntax.setField(_fWeek_4, 'week_4', DbType.bool);
+  }
+
+  static TableField? _fWeek_5;
+  static TableField get week_5 {
+    return _fWeek_5 =
+        _fWeek_5 ?? SqlSyntax.setField(_fWeek_5, 'week_5', DbType.bool);
+  }
+
+  static TableField? _fWeek_6;
+  static TableField get week_6 {
+    return _fWeek_6 =
+        _fWeek_6 ?? SqlSyntax.setField(_fWeek_6, 'week_6', DbType.bool);
+  }
+
+  static TableField? _fWeek_7;
+  static TableField get week_7 {
+    return _fWeek_7 =
+        _fWeek_7 ?? SqlSyntax.setField(_fWeek_7, 'week_7', DbType.bool);
+  }
+
+  static TableField? _fWeek_8;
+  static TableField get week_8 {
+    return _fWeek_8 =
+        _fWeek_8 ?? SqlSyntax.setField(_fWeek_8, 'week_8', DbType.bool);
+  }
+
+  static TableField? _fWeek_9;
+  static TableField get week_9 {
+    return _fWeek_9 =
+        _fWeek_9 ?? SqlSyntax.setField(_fWeek_9, 'week_9', DbType.bool);
+  }
+
+  static TableField? _fWeek_10;
+  static TableField get week_10 {
+    return _fWeek_10 =
+        _fWeek_10 ?? SqlSyntax.setField(_fWeek_10, 'week_10', DbType.bool);
+  }
+
+  static TableField? _fWeek_11;
+  static TableField get week_11 {
+    return _fWeek_11 =
+        _fWeek_11 ?? SqlSyntax.setField(_fWeek_11, 'week_11', DbType.bool);
+  }
+
+  static TableField? _fWeek_12;
+  static TableField get week_12 {
+    return _fWeek_12 =
+        _fWeek_12 ?? SqlSyntax.setField(_fWeek_12, 'week_12', DbType.bool);
+  }
+}
+// endregion PlcFields
+
+//region PlcManager
+class PlcManager extends SqfEntityProvider {
+  PlcManager()
+      : super(AttendanceDbModel(),
+            tableName: _tableName,
+            primaryKeyList: _primaryKeyList,
+            whereStr: _whereStr);
+  static const String _tableName = 'plc';
+  static const List<String> _primaryKeyList = ['id'];
+  static const String _whereStr = 'id=?';
+}
+
+//endregion PlcManager
 // region User
 class User extends TableBase {
   User({this.id, this.staffId, this.username, this.password}) {

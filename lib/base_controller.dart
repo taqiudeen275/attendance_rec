@@ -269,6 +269,84 @@ class UserController extends BaseSqfEntityController<User> {
   }
 }
 
+class StaffLessionNoteController extends BaseSqfEntityController<Staff_lesson_note> {
+  RxBool isSelected = false.obs;
+  RxList selectedID = [].obs;
+
+  // List<Staff_lesson_note> onSearched() {
+  //   if (searchQuery.value.isNotEmpty) {
+  //     return findUserContainingValue(searchQuery.value, models);
+  //   }
+  //   return [];
+  // }
+
+  @override
+  Future<void> fetchModels() async {
+    isLoading.value = true;
+    models.value = await Staff_lesson_note().select().toList(preload: true);
+    resetSelected();
+    isLoading.value = false;
+    return super.fetchModels();
+  }
+
+  Future<void> deleteById(int id) async {
+    await Staff_lesson_note().select().id.equals(id).delete();
+    await fetchModels();
+  }
+
+  void resetSelected() {
+    isSelected.value = false;
+    selectedID.value = [];
+  }
+
+  Future<void> deleteBulkByID(List modelsToDelete) async {
+    for (final model in modelsToDelete) {
+      await deleteById(model);
+    }
+    await fetchModels();
+  }
+}
+
+
+
+class PLCController extends BaseSqfEntityController<Plc> {
+  RxBool isSelected = false.obs;
+  RxList selectedID = [].obs;
+
+  // List<Staff_lesson_note> onSearched() {
+  //   if (searchQuery.value.isNotEmpty) {
+  //     return findUserContainingValue(searchQuery.value, models);
+  //   }
+  //   return [];
+  // }
+
+  @override
+  Future<void> fetchModels() async {
+    isLoading.value = true;
+    models.value = await Plc().select().toList(preload: true);
+    resetSelected();
+    isLoading.value = false;
+    return super.fetchModels();
+  }
+
+  Future<void> deleteById(int id) async {
+    await Plc().select().id.equals(id).delete();
+    await fetchModels();
+  }
+
+  void resetSelected() {
+    isSelected.value = false;
+    selectedID.value = [];
+  }
+
+  Future<void> deleteBulkByID(List modelsToDelete) async {
+    for (final model in modelsToDelete) {
+      await deleteById(model);
+    }
+    await fetchModels();
+  }
+}
+
 class UtilityController extends GetxController {
   final box = GetStorage();
   RxBool isAuthenticated = false.obs;

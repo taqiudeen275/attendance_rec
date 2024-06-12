@@ -22,6 +22,7 @@ const tableStaff = SqfEntityTable(
     SqfEntityField('email', DbType.text),
     SqfEntityField('phone_number', DbType.text),
     SqfEntityField('staff_id', DbType.text),
+    SqfEntityField('rank', DbType.text),
     SqfEntityFieldRelationship(
         parentTable: tableDepartment,
         relationType: RelationType.ONE_TO_MANY,
@@ -43,10 +44,7 @@ const tableAttendance = SqfEntityTable(
         relationType: RelationType.ONE_TO_MANY,
         deleteRule: DeleteRule.CASCADE,
         defaultValue: 0),
-    SqfEntityField(
-      'date',
-      DbType.datetime,
-    ),
+    SqfEntityField('date', DbType.datetime),
     SqfEntityField('check_in_time', DbType.datetime),
     SqfEntityField('check_out_time', DbType.datetime),
     SqfEntityField('attendance_status', DbType.text),
@@ -69,8 +67,8 @@ const tableDepartment = SqfEntityTable(
   ],
 );
 
-const tableUser = SqfEntityTable(
-  tableName: 'user',
+const tableStaffLessonNote = SqfEntityTable(
+  tableName: 'staff_lesson_note',
   primaryKeyName: 'id',
   primaryKeyType: PrimaryKeyType.integer_auto_incremental,
   useSoftDeleting: false,
@@ -78,8 +76,65 @@ const tableUser = SqfEntityTable(
     SqfEntityFieldRelationship(
         parentTable: tableStaff,
         relationType: RelationType.ONE_TO_MANY,
-        deleteRule: DeleteRule.SET_NULL,
+        deleteRule: DeleteRule.CASCADE,
         defaultValue: 0),
+    SqfEntityField('academic_year', DbType.text),
+    SqfEntityField('term', DbType.text),
+    SqfEntityField('week_1', DbType.bool),
+    SqfEntityField('week_2', DbType.bool),
+    SqfEntityField('week_3', DbType.bool),
+    SqfEntityField('week_4', DbType.bool),
+    SqfEntityField('week_5', DbType.bool),
+    SqfEntityField('week_6', DbType.bool),
+    SqfEntityField('week_7', DbType.bool),
+    SqfEntityField('week_8', DbType.bool),
+    SqfEntityField('week_9', DbType.bool),
+    SqfEntityField('week_10', DbType.bool),
+    SqfEntityField('week_11', DbType.bool),
+    SqfEntityField('week_12', DbType.bool),
+  ],
+);
+
+const tablePLC = SqfEntityTable(
+  tableName: 'plc',
+  primaryKeyName: 'id',
+  primaryKeyType: PrimaryKeyType.integer_auto_incremental,
+  useSoftDeleting: false,
+  fields: [
+    SqfEntityFieldRelationship(
+      parentTable: tableStaff,
+      relationType: RelationType.ONE_TO_MANY,
+      deleteRule: DeleteRule.CASCADE,
+      defaultValue: 0,
+    ),
+    SqfEntityField('academic_year', DbType.text),
+    SqfEntityField('term', DbType.text),
+    SqfEntityField('week_1', DbType.bool),
+    SqfEntityField('week_2', DbType.bool),
+    SqfEntityField('week_3', DbType.bool),
+    SqfEntityField('week_4', DbType.bool),
+    SqfEntityField('week_5', DbType.bool),
+    SqfEntityField('week_6', DbType.bool),
+    SqfEntityField('week_7', DbType.bool),
+    SqfEntityField('week_8', DbType.bool),
+    SqfEntityField('week_9', DbType.bool),
+    SqfEntityField('week_10', DbType.bool),
+    SqfEntityField('week_11', DbType.bool),
+    SqfEntityField('week_12', DbType.bool),
+  ],
+);
+const tableUser = SqfEntityTable(
+  tableName: 'user',
+  primaryKeyName: 'id',
+  primaryKeyType: PrimaryKeyType.integer_auto_incremental,
+  useSoftDeleting: false,
+  fields: [
+    SqfEntityFieldRelationship(
+      parentTable: tableStaff,
+      relationType: RelationType.ONE_TO_MANY,
+      deleteRule: DeleteRule.SET_NULL,
+      defaultValue: 0,
+    ),
     SqfEntityField('username', DbType.text),
     SqfEntityField('password', DbType.text),
   ],
@@ -106,7 +161,9 @@ const myDbModel = SqfEntityModel(
     tableStaff,
     tableAttendance,
     tableDepartment,
-    tableUser
+    tableStaffLessonNote,
+    tablePLC,
+    tableUser,
   ],
 
   // put defined sequences into the sequences list.

@@ -55,7 +55,6 @@ class StaffDataData extends SqfEntityDBTableDataSource {
         FilledButton(
           onPressed: () async {
             await staffController.deleteModel(itemToDelete);
-            // ignore: use_build_context_synchronously
             Navigator.pop(context);
           },
           child: const Text("Yes"),

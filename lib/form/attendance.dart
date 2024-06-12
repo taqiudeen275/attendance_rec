@@ -24,6 +24,12 @@ class _AttendanceAddState extends State<AttendanceAdd> {
   final StaffController staffController = Get.put(StaffController());
   late final Staff selectedStaff;
 
+  final option = <String>[
+    'Check In',
+    'Check Out',
+  ];
+  String selected = "Check In";
+
   @override
   void initState() {
     _staffController.text = widget.attendance?.date?.toString() ?? '';
@@ -104,7 +110,25 @@ class _AttendanceAddState extends State<AttendanceAdd> {
                 },
               ),
             ),
-
+            const SizedBox(height: 16.0),
+            InfoLabel(
+              label: "Check On/Out: ",
+              child: ComboBox<String>(
+                value: option[0],
+                items: option.map((e) {
+                  return ComboBoxItem(
+                    value: e,
+                    child: Text(e),
+                  );
+                }).toList(),
+                onChanged: (op) {
+                  print(op);
+                  setState(() {
+                    selected = op!;
+                  });
+                },
+              ),
+            ),
             const SizedBox(height: 16.0),
             // Submit Button
             FilledButton(
@@ -122,7 +146,7 @@ class _AttendanceAddState extends State<AttendanceAdd> {
   }
 
   Future<void> _submitForm() async {
-   await attendanceController.fetchByDate(DateTime.now());
+    await attendanceController.fetchByDate(DateTime.now());
 
     if (attendanceController.attendacesByDate
         .any((att) => att.staffId == selectedStaff.id)) {
